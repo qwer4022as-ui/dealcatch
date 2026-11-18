@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
+import { ListingCompare } from "@/components/ListingCompare";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceSummary } from "@/components/PriceSummary";
 import { SampleBanner } from "@/components/SampleBanner";
@@ -12,7 +13,8 @@ import { formatKRW, formatKstDateTime } from "@/lib/format";
 import { buildChartSeries } from "@/lib/pricing/chart";
 import { outcomeLabel, sourceBadge } from "@/lib/pricing/labels";
 import { computePriceStats } from "@/lib/pricing/stats";
-import { getProductDetail, getVariantHistory } from "@/lib/repositories/product-detail";
+import { compareListings } from "@/lib/pricing/compare";
+import { getListingComparison, getProductDetail, getVariantHistory } from "@/lib/repositories/product-detail";
 
 const RECENT_LIMIT = 20;
 
@@ -42,6 +44,7 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
     product.variants.find((v) => v.listingVariantId === requested) ?? product.variants[0] ?? null;
 
   const now = new Date();
+  const compareRows = compareListings(await getListingComparison(product, now));
 
   return (
     <>
@@ -100,6 +103,8 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
           </div>
         </nav>
       )}
+
+      <ListingCompare rows={compareRows} now={now} />
 
       {selected ? (
         <VariantSection
