@@ -2,6 +2,12 @@
 
 의류 쇼핑 플랫폼의 가격 변동을 추적하고 현재 할인가가 과거 수집 가격 대비 얼마나 저렴한지 분석한다.
 
+**배포 주소: https://ax-private-n34m.vercel.app** (main 에 merge 되면 Vercel 이 자동 배포)
+
+- 보기(대시보드·목록·상세)는 누구나, 등록·가격 입력·무효 처리는 관리자 로그인 후 가능
+- 가격 수집은 수동 입력 + 북마클릿 ([무신사 검토](docs/platform-reviews/musinsa.md), [네이버 쇼핑 API 검토](docs/platform-reviews/naver-shopping.md))
+- 북마클릿은 사용하는 주소(로컬 `localhost:3008` 또는 배포 주소)의 `/bookmarklet` 에서 각각 설치
+
 - 요구사항: [docs/PRD.md](docs/PRD.md)
 - 구조: [docs/architecture.md](docs/architecture.md)
 - DB: [docs/database.md](docs/database.md)
