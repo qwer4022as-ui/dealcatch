@@ -4,7 +4,7 @@
 
 참고 문서: [docs/PRD.md](docs/PRD.md) · [docs/wireframe.md](docs/wireframe.md) · [docs/architecture.md](docs/architecture.md) · [docs/database.md](docs/database.md)
 
-## 작업 규칙 (10/10)
+## 작업 규칙
 
 - PRD와 wireframe을 먼저 읽는다.
 - 기능은 자기 branch에서 수정한다.
@@ -24,7 +24,7 @@
 - 기능 하나에 branch 하나. 머지가 끝난 branch는 다시 쓰지 않고 새로 만든다.
 - 다른 사람 branch는 수정하지 않는다.
 - 사용자가 처음 작업을 요청하면, 지금 branch 이름을 알려 주고 시작한다.
-- 다른 작업이 커밋 안 한 채로 작업 폴더에 남아 있으면 섞지 않는다. 그 작업을 먼저 커밋하거나 주인에게 확인한 뒤 새 branch로 작업한다 (11/08부터 공용 폴더에서 바로 작업).
+- 다른 작업이 커밋 안 한 채로 작업 폴더에 남아 있으면 섞지 않는다. 그 작업을 먼저 커밋하거나 주인에게 확인한 뒤 새 branch로 작업한다.
 
 ## Git 규칙
 
