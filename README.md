@@ -16,7 +16,7 @@ cd ax-private
 nvm use            # .nvmrc의 Node 22 사용
 npm ci             # package-lock.json 그대로 설치
 cp .env.example .env.local   # 값은 직접 채운다 (Git에 올리지 않음)
-npm run dev        # http://localhost:3000
+npm run dev        # http://localhost:3008 (포트 고정)
 ```
 
 ## 작업 시작 · 종료 루틴
@@ -33,7 +33,7 @@ git push -u origin feature/기능이름   # 이후 GitHub에서 PR 생성 · mer
 
 | 명령 | 설명 |
 |---|---|
-| `npm run dev` | 개발 서버 |
+| `npm run dev` | 개발 서버 (http://localhost:3008) |
 | `npm run build` | 프로덕션 빌드 |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript 타입 검사 |
