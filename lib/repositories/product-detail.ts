@@ -1,6 +1,8 @@
 import "server-only";
 import { createReadClient } from "@/lib/supabase/server";
-import type { AttemptOutcome, CollectionAttempt, PriceSnapshot, PriceSource } from "@/lib/pricing/types";
+import type { CompareRow } from "@/lib/pricing/compare";
+import { summarizeProduct } from "@/lib/pricing/summary";
+import type { AttemptOutcome, CollectionAttempt, PriceSnapshot, PriceSource, StockStatus } from "@/lib/pricing/types";
 
 const PAGE_SIZE = 1000; // Supabase API 기본 최대 행 수
 const ATTEMPT_LIMIT = 200;
@@ -146,4 +148,63 @@ export async function getVariantHistory(listingVariantId: number, listingId: num
       errorDetail: a.error_detail,
     })),
   };
+}
+
+/**
+ * 판매처(색상 페이지)별 요약. 목록 화면과 같은 기준(summarizeProduct)을 판매처 단위로 적용한다.
+ * 판매처가 2개 이상일 때 상세 화면의 비교표에 쓴다.
+ */
+export async function getListingComparison(product: ProductDetail, now: Date): Promise<CompareRow[]> {
+  if (product.listings.length < 2) return [];
+  const db = createReadClient();
+  const variantIds = product.variants.map((v) => v.listingVariantId);
+  const [sumRes, healthRes] = await Promise.all([
+    db
+      .from("v_variant_price_summary")
+      .select("listing_variant_id, record_count, low_price, low_at, has_sample")
+      .in("listing_variant_id", variantIds),
+    db
+      .from("v_listing_health")
+      .select("listing_id, last_attempt_at, last_success_at, failures_since_success")
+      .in("listing_id", product.listings.map((l) => l.id)),
+  ]);
+  if (sumRes.error) fail("가격 요약", sumRes.error);
+  if (healthRes.error) fail("수집 상태", healthRes.error);
+  const sums = new Map(sumRes.data.map((r) => [r.listing_variant_id, r]));
+  const health = new Map(healthRes.data.map((r) => [r.listing_id, r]));
+  const toDate = (s: string | null | undefined) => (s ? new Date(s) : null);
+
+  return product.listings.map((l) => {
+    const vs = product.variants.filter((v) => v.listingId === l.id);
+    const h = health.get(l.id);
+    const color = vs.find((v) => v.color)?.color;
+    return {
+      listingId: l.id,
+      label: color ? `${l.platformName} · ${color}` : `${l.platformName} #${l.id}`,
+      url: l.url,
+      summary: summarizeProduct(
+        vs.map((v) => {
+          const sm = sums.get(v.listingVariantId);
+          return {
+            label: v.optionLabel,
+            latestPrice: v.latestPrice,
+            latestStock: (v.latestStock ?? null) as StockStatus | null,
+            lowPrice: sm?.low_price ?? null,
+            lowAt: toDate(sm?.low_at),
+            recordCount: sm?.record_count ?? 0,
+            hasSample: sm?.has_sample ?? false,
+          };
+        }),
+        [
+          {
+            failuresSinceSuccess: h?.failures_since_success ?? 0,
+            lastSuccessAt: toDate(h?.last_success_at),
+            lastAttemptAt: toDate(h?.last_attempt_at),
+            hasRecords: vs.some((v) => (sums.get(v.listingVariantId)?.record_count ?? 0) > 0),
+          },
+        ],
+        now,
+      ),
+    };
+  });
 }
