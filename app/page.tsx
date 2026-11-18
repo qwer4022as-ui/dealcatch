@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
+import { AlertList } from "@/components/AlertList";
 import { CheckList } from "@/components/CheckList";
 import { ProductTable } from "@/components/ProductTable";
 import { SampleBanner } from "@/components/SampleBanner";
@@ -9,7 +10,9 @@ import { formatAgo } from "@/lib/format";
 import { healthBadge } from "@/lib/pricing/labels";
 import { NEAR_LOW_PCT, isNearLow } from "@/lib/pricing/summary";
 import { isAdmin } from "@/lib/auth/admin";
+import { evaluateAlerts } from "@/lib/pricing/alerts";
 import { buildCheckList } from "@/lib/pricing/checklist";
+import { getTargets } from "@/lib/repositories/alerts";
 import { listCheckTargets, listProducts } from "@/lib/repositories/product-list";
 
 export default function DashboardPage() {
@@ -39,6 +42,20 @@ async function Dashboard() {
   const [items, admin] = await Promise.all([listProducts(undefined, now), isAdmin()]);
   // 할 일 목록은 관리자에게만 보인다
   const checkList = admin ? buildCheckList(await listCheckTargets(), now) : null;
+  const alerts = admin
+    ? evaluateAlerts(
+        await getTargets().then((targets) =>
+          items.map((p) => ({
+            productId: p.id,
+            name: `${p.brandName} ${p.name}`,
+            isSample: p.isSample,
+            targetPrice: targets.get(p.id) ?? null,
+            variants: p.alertVariants,
+          })),
+        ),
+        now,
+      )
+    : null;
 
   const nearLow = items
     .filter((p) => isNearLow(p.summary))
@@ -56,6 +73,8 @@ async function Dashboard() {
   return (
     <>
       {items.some((p) => p.isSample) && <SampleBanner />}
+
+      {alerts && <AlertList targetHits={alerts.targetHits} newLows={alerts.newLows} now={now} />}
 
       {checkList && <CheckList data={checkList} now={now} />}
 

@@ -28,7 +28,7 @@ platforms 1─< listings 1─< listing_variants >─┘
                 │                                      │
                 └──────────────< collection_attempts ──┘
 
-(P2) price_alerts >─ product_variants        alert_events >─ price_alerts
+price_alerts >─ products (목표가)          (P2) alert_events >─ price_alerts
 (P2) ai_insights  ── target(product | listing_variant)
 ```
 
@@ -172,16 +172,17 @@ platforms 1─< listings 1─< listing_variants >─┘
 
 ### 3.10 확장 테이블 (P2, 마이그레이션은 나중에)
 
-**`price_alerts`**
+**`price_alerts`** (구현됨, 마이그레이션 `20261118124305_price_alerts.sql`)
 
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
-| id | bigint PK | |
-| product_variant_id | bigint FK | 정규 변형 기준 (플랫폼 무관) |
-| platform_id | smallint FK nullable | NULL이면 모든 플랫폼 |
-| condition | enum | `below_price` / `new_period_low` / `drop_percent` |
-| threshold | integer | 가격 또는 % |
-| is_active | boolean | |
+| product_id | bigint PK, FK → products ON DELETE CASCADE | 상품당 1개 |
+| target_price | integer, 1 ~ 100,000,000 | 목표가. 판매 중인 옵션의 현재가 ≤ 목표가이면 알림 |
+| updated_at | timestamptz | |
+
+- 브라우저 비공개: RLS 켜고 정책 없음, anon·authenticated 권한 없음. service_role 만 읽고 쓴다.
+- "최저가 갱신" 알림은 설정 없이 `v_variant_price_summary.low_first_at`(최저가 첫 도달 시각)으로 판단한다: 최근 7일 안에 처음 도달했고 그보다 앞선 기록이 있으면 갱신 (`lib/pricing/alerts.ts`).
+- 초기 설계의 옵션 단위·조건 3종은 단순화했다. 알림 채널(메일 등)은 아직 없고 대시보드에 표시한다.
 
 **`alert_events`**: `alert_id`, `snapshot_id`, `triggered_at`, `delivered_at`, `channel`
 
@@ -245,7 +246,8 @@ order by ps.listing_variant_id, ps.collected_at desc;
 | platforms, brands, products, product_variants, listings, listing_variants | SELECT | ALL |
 | price_snapshots | SELECT | INSERT, UPDATE(`is_void`, `void_reason`만) |
 | collection_runs, collection_attempts | SELECT | INSERT, UPDATE |
-| ai_insights, price_alerts | SELECT (P2에서 사용자 단위로 변경) | ALL |
+| price_alerts | 없음 (비공개) | ALL |
+| ai_insights (P2) | SELECT | ALL |
 
 모든 테이블에 RLS를 켠다. 정책이 없는 테이블은 anon이 접근할 수 없다.
 
