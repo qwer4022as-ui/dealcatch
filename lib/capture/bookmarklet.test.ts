@@ -198,6 +198,74 @@ describe("북마클릿 옵션 읽기", () => {
   });
 });
 
+describe("즐겨찾기 주소 그대로 실행 (사용자 확인 데이터: 색상 코드 25 = 다크 그레이)", () => {
+  it("javascript: 주소를 풀어 실행해도 색상·사이즈가 채워짐", () => {
+    const nd = JSON.stringify({
+      props: {
+        pageProps: {
+          dehydratedState: {
+            queries: [
+              { state: { data: { data: { goodsNo: 7160101, styleNo: "HGF1HZ333BBK" } } } },
+              {
+                state: {
+                  data: {
+                    data: {
+                      optionItems: ["S", "M", "L", "XL"].map((size, i) => ({
+                        no: 32720523 + i,
+                        goodsNo: 7160101,
+                        price: 0,
+                        isDeleted: false,
+                        optionValues: [{ name: size, optionName: "사이즈" }],
+                        colors: [{ optionItemNo: 32720523 + i, colorCode: "25", colorType: "MUSINSA" }],
+                      })),
+                    },
+                  },
+                },
+              },
+              { state: { data: { data: {} } } },
+              { state: { data: { data: {} } } },
+              { state: { data: { data: {} } } },
+              {
+                state: {
+                  data: {
+                    data: {
+                      colorImages: [
+                        { colorId: "24", colorName: "라이트 그레이" },
+                        { colorId: "25", colorName: "다크 그레이" },
+                        { colorId: "26", colorName: "카멜" },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    const href = buildBookmarkletHref("http://localhost:3008");
+    const code = decodeURIComponent(href.slice("javascript:".length));
+    const open = vi.fn();
+    const alert = vi.fn();
+    const meta = MUSINSA_META;
+    const document = {
+      getElementById: (id: string) => (id === "__NEXT_DATA__" ? { textContent: nd } : null),
+      querySelector: (sel: string) => {
+        const m = sel.match(/^meta\[property="(.+)"\]$/);
+        const v = m ? meta[m[1]] : undefined;
+        return v === undefined ? null : { getAttribute: () => v };
+      },
+    };
+    new Function("document", "location", "window", "alert", code)(
+      document, { hostname: "www.musinsa.com", href: "https://www.musinsa.com/products/7160101" }, { open }, alert,
+    );
+    const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
+    expect(r.ok && r.value.options.map((o) => o.label)).toEqual([
+      "다크 그레이 / S", "다크 그레이 / M", "다크 그레이 / L", "다크 그레이 / XL",
+    ]);
+  });
+});
+
 describe("buildBookmarkletHref", () => {
   it("javascript: 주소, 이상한 앱 주소는 거부", () => {
     expect(buildBookmarkletHref("https://ax-private.vercel.app").startsWith("javascript:")).toBe(true);
