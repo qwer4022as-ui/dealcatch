@@ -3,6 +3,13 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* 차트 토큰 (dataviz 기본 팔레트) */
+  --chart-surface: #fcfcfb;
+  --chart-sale: #2a78d6;
+  --chart-list: #8a8984;
+  --chart-grid: #e7e6e2;
+  --chart-text: #52514e;
+  --chart-soldout: #52514e;
 }
 
 @theme inline {
@@ -14,6 +21,12 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --chart-surface: #1a1a19;
+    --chart-sale: #3987e5;
+    --chart-list: #8f8e88;
+    --chart-grid: #2e2e2c;
+    --chart-text: #c3c2b7;
+    --chart-soldout: #c3c2b7;
   }
 }
 
