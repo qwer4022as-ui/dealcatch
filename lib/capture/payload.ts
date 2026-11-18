@@ -17,6 +17,16 @@ export interface CaptureOption {
   extraPrice: number | null;
 }
 
+/** 같은 상품의 다른 색상 페이지 (무신사는 색상마다 상품 번호가 다르다) */
+export interface CaptureSibling {
+  externalId: string;
+  url: string;
+  color: string;
+  salePrice: number | null;
+  listPrice: number | null;
+  soldOut: boolean | null;
+}
+
 export interface CapturePayload {
   externalId: string;
   url: string;
@@ -26,6 +36,7 @@ export interface CapturePayload {
   salePrice: number | null;
   listPrice: number | null;
   options: CaptureOption[];
+  siblings: CaptureSibling[];
 }
 
 export type CaptureResult = { ok: true; value: CapturePayload } | { ok: false; error: string };
@@ -81,6 +92,26 @@ export function decodeCapture(encoded: string): CaptureResult {
     });
   }
 
+  const siblings: CaptureSibling[] = [];
+  for (const raw of Array.isArray(r.siblings) ? r.siblings.slice(0, 20) : []) {
+    const sb = (raw ?? {}) as Record<string, unknown>;
+    const sp = parseProductUrl(typeof sb.url === "string" ? sb.url : "");
+    const color = str(sb.color, 30);
+    if (!sp.ok || sp.externalId !== String(sb.externalId) || sp.externalId === parsed.externalId || !color) continue;
+    if (siblings.some((x) => x.externalId === sp.externalId)) continue;
+    let ss = price(sb.salePrice);
+    let sl = price(sb.listPrice);
+    if (ss !== null && sl !== null && ss > sl) [ss, sl] = [sl, ss];
+    siblings.push({
+      externalId: sp.externalId,
+      url: sp.canonicalUrl,
+      color,
+      salePrice: ss,
+      listPrice: sl,
+      soldOut: sb.soldOut === true ? true : sb.soldOut === false ? false : null,
+    });
+  }
+
   let sale = price(r.salePrice);
   let list = price(r.listPrice);
   if (sale !== null && list !== null && sale > list) [sale, list] = [list, sale];
@@ -96,6 +127,7 @@ export function decodeCapture(encoded: string): CaptureResult {
       salePrice: sale,
       listPrice: list,
       options,
+      siblings,
     },
   };
 }

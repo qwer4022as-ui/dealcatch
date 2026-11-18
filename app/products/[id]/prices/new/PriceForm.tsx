@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { priceDefaults } from "@/lib/capture/prefill";
+import { priceDefaultsForListing } from "@/lib/capture/prefill";
 import { useCapturedPayload } from "@/lib/capture/useCapturedPayload";
 import { formatKRW } from "@/lib/format";
 import { recordPricesAction, type PriceFormState } from "./actions";
@@ -44,8 +44,8 @@ export function PriceForm({
   });
   // 등록 화면에서 넘어온 경우 이 탭에 보관된 북마클릿 값을 쓴다 (URL 이 같을 때만)
   const captured = useCapturedPayload({ useStored: true });
-  const sameListing = captured.payload !== null && captured.payload.url === listingUrl;
-  const prefill = sameListing && captured.payload ? priceDefaults(captured.payload, variants) : null;
+  // 현재 페이지 또는 함께 가져온 다른 색상 페이지와 URL 이 같을 때만 채운다
+  const prefill = captured.payload ? priceDefaultsForListing(captured.payload, listingUrl, variants) : null;
   const submitted = Object.keys(state.values).length > 0;
   const values = submitted ? state.values : (prefill?.values ?? {});
   const val = (name: string, fallback = "") => values[name] ?? fallback;
@@ -60,7 +60,7 @@ export function PriceForm({
           )}
         </div>
       )}
-      {captured.payload && !sameListing && captured.source === "hash" && (
+      {captured.payload && !prefill && captured.source === "hash" && (
         <div role="alert" className="rounded-md bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
           ◐ 가져온 상품이 이 판매처와 달라서 값을 채우지 않았습니다.
         </div>

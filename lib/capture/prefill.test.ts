@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { priceDefaults, registerDefaults } from "./prefill";
+import { priceDefaults, priceDefaultsForListing, registerDefaults } from "./prefill";
 import type { CapturePayload } from "./payload";
 
 const p: CapturePayload = {
@@ -16,6 +16,7 @@ const p: CapturePayload = {
     { label: "네이비 / M", soldOut: false, extraPrice: null },
     { label: "블랙 / XL", soldOut: null, extraPrice: null },
   ],
+  siblings: [],
 };
 
 describe("registerDefaults", () => {
@@ -23,6 +24,7 @@ describe("registerDefaults", () => {
     expect(registerDefaults(p)).toEqual({
       url: p.url, brand: "테스트", name: "울 코트", modelNo: "AB-1", category: "",
       options: "블랙 / M\n블랙 / L\n네이비 / M\n블랙 / XL",
+      siblings: [],
     });
   });
 });
@@ -57,5 +59,30 @@ describe("priceDefaults", () => {
   it("가격을 못 읽었으면 가격 칸은 비워 둠", () => {
     const r = priceDefaults({ ...p, salePrice: null, listPrice: null, options: [] }, [{ listingVariantId: 1, optionLabel: "FREE" }]);
     expect(r.values).toEqual({ stock_1: "unknown" });
+  });
+});
+
+describe("다른 색상 기본값", () => {
+  const withSib: CapturePayload = {
+    ...p,
+    siblings: [
+      { externalId: "2", url: "https://www.musinsa.com/products/2", color: "Red", salePrice: 84900, listPrice: 99900, soldOut: false },
+      { externalId: "3", url: "https://www.musinsa.com/products/3", color: "White", salePrice: null, listPrice: null, soldOut: true },
+    ],
+  };
+  it("등록 폼: 다른 색상은 체크된 상태, 사이즈는 현재 페이지 기준", () => {
+    expect(registerDefaults(withSib).siblings).toEqual([
+      { on: true, url: "https://www.musinsa.com/products/2", color: "Red", sizes: "M, L, XL", note: "84,900원" },
+      { on: true, url: "https://www.musinsa.com/products/3", color: "White", sizes: "M, L, XL", note: "품절" },
+    ]);
+  });
+  it("가격 폼: 판매처 URL 로 현재 페이지 / 다른 색상 / 없음 구분", () => {
+    const vs = [{ listingVariantId: 7, optionLabel: "Red / M" }];
+    expect(priceDefaultsForListing(withSib, p.url, vs)?.values.sale_7).toBe("129000");
+    expect(priceDefaultsForListing(withSib, "https://www.musinsa.com/products/2", vs)?.values).toEqual({
+      sale_7: "84900", list_7: "99900", stock_7: "unknown",
+    });
+    expect(priceDefaultsForListing(withSib, "https://www.musinsa.com/products/3", vs)?.values).toEqual({ stock_7: "sold_out" });
+    expect(priceDefaultsForListing(withSib, "https://www.musinsa.com/products/9", vs)).toBeNull();
   });
 });

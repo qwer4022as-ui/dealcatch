@@ -9,7 +9,7 @@ import { registerProductAction, type RegisterState } from "./actions";
 
 const empty: RegisterState = {
   errors: [],
-  values: { url: "", brand: "", name: "", modelNo: "", category: "", options: "" },
+  values: { url: "", brand: "", name: "", modelNo: "", category: "", options: "", siblings: [] },
   existingProductId: null,
 };
 
@@ -103,6 +103,44 @@ export function RegisterForm({ brands }: { brands: string[] }) {
           className={`${inputClass} font-mono`}
         />
       </Field>
+
+      {v.siblings.length > 0 && (
+        <fieldset className="flex flex-col gap-3 rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
+          <legend className="px-1 text-sm font-medium">다른 색상도 함께 등록</legend>
+          <p className="text-xs text-zinc-600 dark:text-zinc-400">
+            무신사는 색상마다 페이지(상품 번호)가 따로 있습니다. 체크한 색상은 같은 상품의 판매처로 함께 등록되고, 가격 이력은
+            색상별로 따로 쌓입니다. <strong>사이즈는 현재 페이지 기준으로 채웠으니</strong> 다르면 고쳐 주세요.
+          </p>
+          <input type="hidden" name="sib_count" value={v.siblings.length} />
+          {v.siblings.map((sb, i) => (
+            <div key={sb.url} className="grid gap-2 sm:grid-cols-[auto_10rem_1fr] sm:items-center">
+              <input type="hidden" name={`sib_${i}_url`} value={sb.url} />
+              <input type="hidden" name={`sib_${i}_note`} value={sb.note} />
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name={`sib_${i}_on`} defaultChecked={sb.on} />
+                <a href={sb.url} target="_blank" rel="noreferrer" className="underline underline-offset-2">
+                  페이지 ↗
+                </a>
+                {sb.note && <span className="text-xs text-zinc-600 dark:text-zinc-400">{sb.note}</span>}
+              </label>
+              <input
+                name={`sib_${i}_color`}
+                aria-label={`다른 색상 ${i + 1} 색상 이름`}
+                defaultValue={sb.color}
+                maxLength={30}
+                className={inputClass}
+              />
+              <input
+                name={`sib_${i}_sizes`}
+                aria-label={`다른 색상 ${i + 1} 사이즈 (쉼표로 구분)`}
+                defaultValue={sb.sizes}
+                placeholder="S, M, L (비우면 색상만)"
+                className={inputClass}
+              />
+            </div>
+          ))}
+        </fieldset>
+      )}
 
       <div className="flex gap-2">
         <button

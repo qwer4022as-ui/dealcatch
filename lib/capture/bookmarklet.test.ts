@@ -97,6 +97,7 @@ describe("북마클릿 (실제 코드 실행)", () => {
         salePrice: 115400,
         listPrice: 129900,
         options: ["S", "M", "L", "XL"].map((size) => ({ label: `블랙 / ${size}`, soldOut: null, extraPrice: 0 })),
+        siblings: [],
       },
     });
   });
@@ -262,6 +263,51 @@ describe("즐겨찾기 주소 그대로 실행 (사용자 확인 데이터: 색�
     const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
     expect(r.ok && r.value.options.map((o) => o.label)).toEqual([
       "다크 그레이 / S", "다크 그레이 / M", "다크 그레이 / L", "다크 그레이 / XL",
+    ]);
+  });
+});
+
+describe("다른 색상 목록 (사용자 확인 데이터: Lightweight Windbreaker)", () => {
+  it("현재 색상은 목록의 이름(Charcoal)으로, 다른 색상(Black)은 siblings 로", () => {
+    const meta = { ...MUSINSA_META, "og:url": "https://www.musinsa.com/products/7160057", "product:price:amount": "84900", "product:price:normal_price": "99900" };
+    const nd = JSON.stringify({
+      props: {
+        pageProps: {
+          dehydratedState: {
+            queries: [
+              { queryKey: ["Detail", "Goods", 7160057], state: { data: { data: { goodsNo: 7160057, styleNo: "WB-CH" } } } },
+              {
+                queryKey: ["Detail", "Option", 7160057],
+                state: { data: { data: { optionItems: ["M", "L"].map((size) => ({ goodsNo: 7160057, price: 0, optionValues: [{ name: size, optionName: "사이즈" }], colors: [{ colorCode: "25" }] })) } } },
+              },
+              {
+                queryKey: ["Detail", "OtherColorGoods", 7160057],
+                state: {
+                  data: {
+                    data: {
+                      curationTabs: [
+                        {
+                          curationGoodsList: [
+                            { goodsNo: 7160056, goodsName: "Lightweight Windbreaker Black", linkUrl: "https://www.musinsa.com/products/7160056", displayColorText: "Black", price: 84900, normalPrice: 99900, isSoldOut: false },
+                            { goodsNo: 7160057, goodsName: "Lightweight Windbreaker Charcoal", linkUrl: "https://www.musinsa.com/products/7160057", displayColorText: "Charcoal", price: 84900, normalPrice: 99900, isSoldOut: false },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+              { queryKey: ["Common", "Colors"], state: { data: { data: { colorImages: [{ colorId: "25", colorName: "다크 그레이" }] } } } },
+            ],
+          },
+        },
+      },
+    });
+    const { open } = run(meta, "www.musinsa.com", nd);
+    const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
+    expect(r.ok && r.value.options.map((o) => o.label)).toEqual(["Charcoal / M", "Charcoal / L"]);
+    expect(r.ok && r.value.siblings).toEqual([
+      { externalId: "7160056", url: "https://www.musinsa.com/products/7160056", color: "Black", salePrice: 84900, listPrice: 99900, soldOut: false },
     ]);
   });
 });

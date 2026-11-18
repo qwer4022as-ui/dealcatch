@@ -30,6 +30,7 @@ describe("decodeCapture", () => {
           { label: "블랙 / L", soldOut: true, extraPrice: null },
           { label: "블랙 / XL", soldOut: null, extraPrice: null },
         ],
+        siblings: [],
       },
     });
   });
@@ -66,6 +67,31 @@ describe("decodeCapture", () => {
     const r = decodeCapture(encodeCapture({ ...valid, name: "a\u0000b" + "가".repeat(300) }));
     expect(r.ok && r.value.name.startsWith("a b")).toBe(true);
     expect(r.ok && r.value.name.length).toBe(200);
+  });
+});
+
+describe("다른 색상 (siblings)", () => {
+  const sib = (over: Record<string, unknown>) => ({
+    externalId: "7160056", url: "https://www.musinsa.com/products/7160056", color: "Black",
+    salePrice: 84900, listPrice: 99900, soldOut: false, ...over,
+  });
+  it("정상 값만 남기고, 현재 상품·중복·색상 없음·주소와 번호 불일치·다른 사이트는 제외", () => {
+    const r = decodeCapture(encodeCapture({
+      ...valid,
+      siblings: [
+        sib({}),
+        sib({}),
+        sib({ externalId: "3912345", url: "https://www.musinsa.com/products/3912345" }),
+        sib({ externalId: "1", url: "https://www.musinsa.com/products/1", color: " " }),
+        sib({ externalId: "2", url: "https://www.musinsa.com/products/3" }),
+        sib({ externalId: "4", url: "https://evil.example/products/4" }),
+        sib({ externalId: "5", url: "https://www.musinsa.com/products/5", color: "Red", salePrice: "x", soldOut: "yes" }),
+      ],
+    }));
+    expect(r.ok && r.value.siblings).toEqual([
+      { externalId: "7160056", url: "https://www.musinsa.com/products/7160056", color: "Black", salePrice: 84900, listPrice: 99900, soldOut: false },
+      { externalId: "5", url: "https://www.musinsa.com/products/5", color: "Red", salePrice: null, listPrice: 99900, soldOut: null },
+    ]);
   });
 });
 

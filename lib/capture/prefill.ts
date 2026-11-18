@@ -1,16 +1,29 @@
 // 검증된 북마클릿 값 → 폼 기본값 (순수 함수)
 
-import type { ProductFormValues } from "@/lib/forms/product";
+import { formatKRW } from "@/lib/format";
+import { parseOptions, type ProductFormValues } from "@/lib/forms/product";
 import { normalizeOptionLabel, optionsToText, type CapturePayload } from "./payload";
 
 export function registerDefaults(p: CapturePayload): ProductFormValues {
+  const optionsText = optionsToText(p.options);
+  // 다른 색상의 사이즈는 현재 페이지 사이즈와 같다고 보고 채운다 (등록 전 사용자가 확인·수정)
+  const sizes = [...new Set(parseOptions(optionsText).variants.map((v) => v.size).filter(Boolean))].join(", ");
   return {
     url: p.url,
     brand: p.brand,
     name: p.name,
     modelNo: p.modelNo,
     category: "",
-    options: optionsToText(p.options),
+    options: optionsText,
+    siblings: p.siblings.map((sb) => ({
+      on: true,
+      url: sb.url,
+      color: sb.color,
+      sizes,
+      note: [sb.salePrice !== null ? formatKRW(sb.salePrice) : null, sb.soldOut === true ? "품절" : null]
+        .filter(Boolean)
+        .join(" · "),
+    })),
   };
 }
 
@@ -48,4 +61,25 @@ export function priceDefaults(
 
   const unmatched = p.options.filter((o) => !matched.has(normalizeOptionLabel(o.label))).map((o) => o.label);
   return { values, unmatched };
+}
+
+/**
+ * 판매처 URL 에 맞는 기본값. 현재 페이지면 priceDefaults, 다른 색상 페이지면 그 색상의 가격을 모든 옵션에 채운다.
+ * 다른 색상의 재고는 그 색상 전체가 품절일 때만 품절, 나머지는 "모름". 맞는 페이지가 없으면 null.
+ */
+export function priceDefaultsForListing(
+  p: CapturePayload,
+  listingUrl: string,
+  variants: { listingVariantId: number; optionLabel: string }[],
+): PriceDefaults | null {
+  if (p.url === listingUrl) return priceDefaults(p, variants);
+  const sb = p.siblings.find((x) => x.url === listingUrl);
+  if (!sb) return null;
+  const values: Record<string, string> = {};
+  for (const v of variants) {
+    if (sb.salePrice !== null) values[`sale_${v.listingVariantId}`] = String(sb.salePrice);
+    if (sb.listPrice !== null) values[`list_${v.listingVariantId}`] = String(sb.listPrice);
+    values[`stock_${v.listingVariantId}`] = sb.soldOut === true ? "sold_out" : "unknown";
+  }
+  return { values, unmatched: [] };
 }

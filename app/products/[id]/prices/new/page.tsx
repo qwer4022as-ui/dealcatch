@@ -52,13 +52,16 @@ async function NewPriceBody({ params, searchParams }: PageProps<"/products/[id]/
   const current = product.listings.find((l) => l.id === requested) ?? product.listings[0];
   if (!current) notFound();
   const variants = product.variants.filter((v) => v.listingId === current.id);
+  const listingColor = (listingId: number) =>
+    product.variants.find((v) => v.listingId === listingId && v.color)?.color ?? `#${listingId}`;
 
   return (
     <>
       {header}
       {registered && (
         <div className="rounded-md bg-emerald-50 px-4 py-2 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
-          ● 상품을 등록했습니다. 지금 확인한 가격을 입력하세요.
+          ● 상품을 등록했습니다{Number(registered) > 1 ? ` (판매처 ${registered}개)` : ""}. 지금 확인한 가격을 입력하세요.
+          {product.listings.length > 1 && " 색상(판매처)마다 따로 저장합니다. 아래에서 색상을 바꿔 가며 입력하세요."}
         </div>
       )}
       {product.listings.length > 1 && (
@@ -70,13 +73,13 @@ async function NewPriceBody({ params, searchParams }: PageProps<"/products/[id]/
               aria-current={l.id === current.id ? "true" : undefined}
               className={`rounded-md px-3 py-1 ring-1 ring-inset ${l.id === current.id ? "bg-zinc-900 text-white ring-zinc-900 dark:bg-zinc-100 dark:text-zinc-900" : "ring-zinc-300 dark:ring-zinc-700"}`}
             >
-              {l.platformName} #{l.id}
+              {l.platformName} · {listingColor(l.id)}
             </Link>
           ))}
         </nav>
       )}
       <p className="text-sm">
-        판매처: {current.platformName} ·{" "}
+        판매처: {current.platformName} · {listingColor(current.id)} ·{" "}
         <a href={current.url} target="_blank" rel="noreferrer" className="underline underline-offset-2">
           상품 페이지 열기 ↗
         </a>
