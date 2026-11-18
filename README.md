@@ -47,6 +47,10 @@ npx supabase db advisors --remote                    # 보안·성능 점검
 
 샘플 데이터 삭제: SQL Editor에서 `select public.purge_sample_data();` (실제 데이터는 남는다)
 
+## CI (GitHub Actions)
+
+PR 을 올리거나 main 에 merge 되면 [.github/workflows/ci.yml](.github/workflows/ci.yml) 이 lint → 타입 검사 → 테스트 → build 를 실행한다. PR 화면의 Checks 에서 결과를 확인하고, 실패하면 merge 하지 않는다. 비밀 값은 쓰지 않는다.
+
 ## 스크립트
 
 | 명령 | 설명 |
