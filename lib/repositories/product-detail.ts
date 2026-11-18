@@ -33,7 +33,7 @@ export interface AttemptRow extends CollectionAttempt {
 }
 
 export interface VariantHistory {
-  snapshots: (PriceSnapshot & { attemptId: number })[];
+  snapshots: (PriceSnapshot & { id: number; attemptId: number; voidReason: string | null })[];
   attempts: AttemptRow[];
 }
 
@@ -108,14 +108,16 @@ export async function getVariantHistory(listingVariantId: number, listingId: num
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await db
       .from("price_snapshots")
-      .select("attempt_id, collected_at, sale_price, list_price, stock_status, source, is_void")
+      .select("id, attempt_id, collected_at, sale_price, list_price, stock_status, source, is_void, void_reason")
       .eq("listing_variant_id", listingVariantId)
       .order("collected_at", { ascending: true })
       .range(from, from + PAGE_SIZE - 1);
     if (error) fail("가격 기록", error);
     for (const r of data) {
       snapshots.push({
+        id: r.id,
         attemptId: r.attempt_id,
+        voidReason: r.void_reason,
         collectedAt: new Date(r.collected_at),
         salePrice: r.sale_price,
         listPrice: r.list_price,

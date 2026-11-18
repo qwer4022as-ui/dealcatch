@@ -6,6 +6,8 @@ import { Badge } from "@/components/Badge";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceSummary } from "@/components/PriceSummary";
 import { SampleBanner } from "@/components/SampleBanner";
+import { VoidButton } from "@/components/VoidButton";
+import { isAdmin } from "@/lib/auth/admin";
 import { formatKRW, formatKstDateTime } from "@/lib/format";
 import { buildChartSeries } from "@/lib/pricing/chart";
 import { outcomeLabel, sourceBadge } from "@/lib/pricing/labels";
@@ -101,6 +103,8 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
 
       {selected ? (
         <VariantSection
+          productId={product.id}
+          canVoid={!product.isSample && (await isAdmin())}
           listingVariantId={selected.listingVariantId}
           listingId={selected.listingId}
           label={`${selected.platformName} · ${selected.optionLabel}`}
@@ -114,11 +118,16 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
 }
 
 async function VariantSection({
+  productId,
+  canVoid,
   listingVariantId,
   listingId,
   label,
   now,
 }: {
+  productId: number;
+  /** 관리자이고 샘플 상품이 아닐 때만 무효 처리 버튼을 보인다 */
+  canVoid: boolean;
   listingVariantId: number;
   listingId: number;
   label: string;
@@ -147,7 +156,8 @@ async function VariantSection({
                   <th className="py-2 pr-4 font-medium">시각 (KST)</th>
                   <th className="py-2 pr-4 text-right font-medium">판매가</th>
                   <th className="py-2 pr-4 font-medium">결과</th>
-                  <th className="py-2 font-medium">출처</th>
+                  <th className="py-2 pr-4 font-medium">출처</th>
+                  {canVoid && <th className="py-2 font-medium">관리</th>}
                 </tr>
               </thead>
               <tbody>
@@ -168,14 +178,25 @@ async function VariantSection({
                       </td>
                       <td className="py-2 pr-4">
                         {a.outcome === "success" ? (
-                          s?.isVoid ? "무효 처리" : "성공"
+                          s?.isVoid ? (
+                            <span title={s.voidReason ?? undefined}>무효 처리{s.voidReason && ` · ${s.voidReason}`}</span>
+                          ) : (
+                            "성공"
+                          )
                         ) : (
                           <span className="text-red-700 dark:text-red-300" title={a.errorDetail ?? undefined}>
                             ✕ {outcomeLabel(a.outcome)}
                           </span>
                         )}
                       </td>
-                      <td className="py-2">{s ? <Badge label={sourceBadge(s.source)} /> : "—"}</td>
+                      <td className="py-2 pr-4">{s ? <Badge label={sourceBadge(s.source)} /> : "—"}</td>
+                      {canVoid && (
+                        <td className="py-2 align-top">
+                          {s && !s.isVoid && s.source !== "sample" && (
+                            <VoidButton productId={productId} listingVariantId={listingVariantId} snapshotId={s.id} />
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
