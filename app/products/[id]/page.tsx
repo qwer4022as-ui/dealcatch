@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
 import { ListingCompare } from "@/components/ListingCompare";
+import { NarrativeCard } from "@/components/NarrativeCard";
 import { TargetPriceForm } from "@/components/TargetPriceForm";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceSummary } from "@/components/PriceSummary";
@@ -15,6 +16,7 @@ import { buildChartSeries } from "@/lib/pricing/chart";
 import { outcomeLabel, sourceBadge } from "@/lib/pricing/labels";
 import { computePriceStats } from "@/lib/pricing/stats";
 import { targetHit } from "@/lib/pricing/alerts";
+import { buildNarrative } from "@/lib/pricing/narrative";
 import { compareListings } from "@/lib/pricing/compare";
 import { getTarget } from "@/lib/repositories/alerts";
 import { getListingComparison, getProductDetail, getVariantHistory } from "@/lib/repositories/product-detail";
@@ -172,6 +174,7 @@ async function VariantSection({
   return (
     <>
       <PriceSummary stats={stats} now={now} variantLabel={label} />
+      <NarrativeCard narrative={buildNarrative(stats, now)} />
       <PriceChart points={points} nowMs={now.getTime()} />
 
       <section aria-label="최근 수집 기록" className="flex flex-col gap-2">
