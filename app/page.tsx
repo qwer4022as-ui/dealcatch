@@ -2,12 +2,15 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
+import { CheckList } from "@/components/CheckList";
 import { ProductTable } from "@/components/ProductTable";
 import { SampleBanner } from "@/components/SampleBanner";
 import { formatAgo } from "@/lib/format";
 import { healthBadge } from "@/lib/pricing/labels";
 import { NEAR_LOW_PCT, isNearLow } from "@/lib/pricing/summary";
-import { listProducts } from "@/lib/repositories/product-list";
+import { isAdmin } from "@/lib/auth/admin";
+import { buildCheckList } from "@/lib/pricing/checklist";
+import { listCheckTargets, listProducts } from "@/lib/repositories/product-list";
 
 export default function DashboardPage() {
   return (
@@ -33,7 +36,9 @@ function Tile({ label, value, note }: { label: string; value: string; note?: str
 async function Dashboard() {
   await connection();
   const now = new Date();
-  const items = await listProducts(undefined, now);
+  const [items, admin] = await Promise.all([listProducts(undefined, now), isAdmin()]);
+  // 할 일 목록은 관리자에게만 보인다
+  const checkList = admin ? buildCheckList(await listCheckTargets(), now) : null;
 
   const nearLow = items
     .filter((p) => isNearLow(p.summary))
@@ -51,6 +56,8 @@ async function Dashboard() {
   return (
     <>
       {items.some((p) => p.isSample) && <SampleBanner />}
+
+      {checkList && <CheckList data={checkList} now={now} />}
 
       <section aria-label="요약" className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Tile label="추적 상품" value={`${items.length}`} />

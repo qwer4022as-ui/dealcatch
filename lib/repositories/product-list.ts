@@ -2,6 +2,7 @@ import "server-only";
 import { createReadClient } from "@/lib/supabase/server";
 import { sanitizeQuery } from "@/lib/search";
 import { summarizeProduct, type ProductSummary } from "@/lib/pricing/summary";
+import type { CheckTarget } from "@/lib/pricing/checklist";
 import type { StockStatus } from "@/lib/pricing/types";
 
 export interface ProductListItem {
@@ -112,6 +113,46 @@ export async function listProducts(q: string | undefined, now: Date): Promise<Pr
       isSample: p.is_sample,
       platformNames: [...new Set(p.listings.map((l) => l.platforms?.name ?? ""))].filter(Boolean),
       summary: summarizeProduct(variants, listings, now),
+    };
+  });
+}
+
+/** "오늘 확인할 상품" 대상: 실제(샘플 아님) 상품의 판매처별 마지막 성공 시각 */
+export async function listCheckTargets(): Promise<CheckTarget[]> {
+  const db = createReadClient();
+  const { data: products, error } = await db
+    .from("products")
+    .select(
+      `id, name, brands ( name ),
+       listings ( id, url, status, platforms ( name ), listing_variants ( product_variants ( color ) ) )`,
+    )
+    .eq("is_sample", false)
+    .order("id", { ascending: true });
+  if (error) fail("확인 대상", error);
+
+  const listings = products.flatMap((p) =>
+    p.listings.filter((l) => l.status === "active").map((l) => ({ p, l })),
+  );
+  if (listings.length === 0) return [];
+
+  const { data: health, error: e2 } = await db
+    .from("v_listing_health")
+    .select("listing_id, last_success_at")
+    .in("listing_id", listings.map(({ l }) => l.id));
+  if (e2) fail("수집 상태", e2);
+  const last = new Map(health.map((h) => [h.listing_id, h.last_success_at]));
+
+  return listings.map(({ p, l }) => {
+    const at = last.get(l.id);
+    return {
+      listingId: l.id,
+      productId: p.id,
+      brandName: p.brands?.name ?? "",
+      productName: p.name,
+      platformName: l.platforms?.name ?? "",
+      color: l.listing_variants.find((v) => v.product_variants?.color)?.product_variants?.color ?? "",
+      url: l.url,
+      lastSuccessAt: at ? new Date(at) : null,
     };
   });
 }
