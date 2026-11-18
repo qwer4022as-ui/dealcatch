@@ -12,7 +12,10 @@ export async function AdminStatus() {
     );
   }
   return (
-    <form action={logoutAction} className="flex items-center gap-2">
+    <form action={logoutAction} className="flex items-center gap-3">
+      <Link href="/products/new" className="rounded-md px-2 py-0.5 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800">
+        + 상품 등록
+      </Link>
       <span className="text-xs text-zinc-600 dark:text-zinc-400">● 관리자</span>
       <button type="submit" className="text-zinc-600 underline-offset-2 hover:underline dark:text-zinc-400">
         로그아웃

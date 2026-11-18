@@ -24,3 +24,8 @@ export function getAdminToken(): string {
   }
   return token;
 }
+
+/** 쓰기용 service role 키. RLS 를 우회하므로 서버 액션 안에서만 사용한다. */
+export function getServiceRoleKey(): string {
+  return required("SUPABASE_SERVICE_ROLE_KEY");
+}
