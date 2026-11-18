@@ -39,7 +39,7 @@ platforms 1─< listings 1─< listing_variants >─┘
 | 컬럼 | 타입 | 제약 | 설명 |
 |---|---|---|---|
 | id | `smallint` | PK | |
-| code | `text` | UNIQUE, NOT NULL | `musinsa`, `29cm`, `wconcept`, `sample` |
+| code | `text` | UNIQUE, NOT NULL | `musinsa`, `29cm`, `wconcept` (마이그레이션에서 등록), `sample-a`, `sample-b` (시드) |
 | name | `text` | NOT NULL | 표시명 |
 | base_url | `text` | | |
 | collection_mode | `collection_mode` enum | NOT NULL, default `'disabled'` | `disabled` / `manual` / `sample` / `api` / `crawl` |
@@ -76,7 +76,7 @@ platforms 1─< listings 1─< listing_variants >─┘
 | 컬럼 | 타입 | 제약 | 설명 |
 |---|---|---|---|
 | id | `bigint` identity | PK | |
-| product_id | `bigint` | FK → products ON DELETE CASCADE | |
+| product_id | `bigint` | FK → products ON DELETE RESTRICT | |
 | color | `text` | NOT NULL, default `''` | 정규화한 색상명 |
 | color_code | `text` | | 브랜드 색상 코드(있으면) |
 | size | `text` | NOT NULL, default `''` | `S`, `M`, `270`, `FREE` 등 |
@@ -106,8 +106,8 @@ platforms 1─< listings 1─< listing_variants >─┘
 | 컬럼 | 타입 | 제약 | 설명 |
 |---|---|---|---|
 | id | `bigint` identity | PK | |
-| listing_id | `bigint` | FK → listings ON DELETE CASCADE | |
-| product_variant_id | `bigint` | FK → product_variants, **nullable** | 정규 변형과 매칭. 매칭 전에는 NULL |
+| listing_id | `bigint` | FK → listings ON DELETE RESTRICT | |
+| product_variant_id | `bigint` | FK → product_variants ON DELETE SET NULL, **nullable** | 정규 변형과 매칭. 매칭 전에는 NULL |
 | external_option_id | `text` | | 플랫폼 옵션 ID |
 | option_label_raw | `text` | NOT NULL | 플랫폼 원문 옵션명 (예: "블랙 / M") |
 | is_active | `boolean` | default true | |
@@ -134,8 +134,12 @@ platforms 1─< listings 1─< listing_variants >─┘
 | created_at | `timestamptz` | default now() | DB 기록 시각 (collected_at과 다를 수 있음) |
 
 - CHECK(`list_price IS NULL OR sale_price <= list_price`). 위반하면 수집 데이터 이상으로 보고 `parse_error` 처리
+- CHECK(`NOT is_void OR void_reason IS NOT NULL`), UNIQUE(`listing_variant_id`, `collected_at`)
 - INDEX(`listing_variant_id`, `collected_at DESC`) WHERE `NOT is_void`
-- 업데이트·삭제 금지: RLS와 트리거로 `is_void`, `void_reason` 외 컬럼 UPDATE를 막는다
+- INSERT 트리거: 미래 시각 금지, `outcome='success'`인 시도에만 연결, 시도와 옵션의 리스팅 일치, **샘플 상품 ↔ `source='sample'` 일치**(샘플과 실제 데이터 혼합 방지), 무효 상태로 INSERT 금지
+- UPDATE 트리거: `is_void`, `void_reason` 외 컬럼 수정 금지, 무효 → 유효 되돌리기 금지
+- DELETE 트리거: 금지. `purge_sample_data()` 안에서 `source='sample'` 행만 예외
+- 모든 FK는 `ON DELETE RESTRICT`(정규 변형 연결만 `SET NULL`)로, 상위 행을 지워 가격 이력이 함께 사라지는 일을 막는다
 - **품절 시 가격**: 품절 상태여도 표시 가격이 있으면 저장하되, 통계 계산 시 품절 기록 포함 여부는 설정값으로 둔다(기본: 포함하지 않음)
 
 ### 3.8 `collection_runs` — 수집 실행 단위
@@ -250,14 +254,17 @@ order by ps.listing_variant_id, ps.collected_at desc;
 ```
 supabase/
 ├── migrations/
-│   ├── 0001_enums.sql
-│   ├── 0002_core_tables.sql        # platforms … listing_variants
-│   ├── 0003_price_and_collection.sql
-│   ├── 0004_views.sql
-│   └── 0005_rls.sql
-└── seed/
-    └── sample.sql
+│   ├── 20261118000100_enums.sql
+│   ├── 20261118000200_core_tables.sql        # platforms … listing_variants, 실제 플랫폼 3개(disabled)
+│   ├── 20261118000300_price_and_collection.sql  # + 무결성 트리거, purge_sample_data()
+│   ├── 20261118000400_views.sql
+│   └── 20261118000500_rls.sql
+├── seed/
+│   └── sample.sql                  # config.toml [db.seed] sql_paths 에 등록
+└── config.toml
 ```
+
+- 파일명 앞 숫자는 Supabase CLI가 적용 순서를 정하는 버전 번호다. 새 마이그레이션은 `npx supabase migration new <이름>`으로 만든다.
 
 - 스키마 변경은 마이그레이션 파일로만 한다. Supabase 대시보드에서 직접 바꾸지 않는다.
 - `supabase gen types typescript`로 생성한 타입 파일을 커밋해서 PC와 노트북의 타입을 같게 유지한다.
@@ -266,15 +273,16 @@ supabase/
 
 | 샘플 상품 | 목적 |
 |---|---|
-| 120일 이상 꾸준히 수집, 중간에 할인 2회 | 30·90일 최저가 정상 표시 |
-| 수집 20일 | 30일·90일 "데이터 부족" 표시 |
-| 50일 수집, 중간 15일 공백 | 커버리지 기준 미달 처리, 그래프 공백 |
-| 최근 3회 연속 실패 | "수집 실패" 배지, 마지막 성공가 + 경고 |
-| 마지막 성공 3일 전 | "오래된 데이터" 표시 |
-| 사이즈별 가격 다름 (추가금) | 변형 단위 저장 확인 |
-| 같은 product_variant를 두 샘플 플랫폼에 연결 | 플랫폼별 비교 |
-| void 처리된 이상치 기록 1건 | 통계에서 제외되는지 확인 |
-| 품절 기간 포함 | 품절 기록 제외 규칙 확인 |
+| 샘플 상품 (모델번호) | 데이터 | 목적 |
+|---|---|---|
+| 울 코트 (SMP-COAT-01) | 130일, 할인 2회, 블랙/L +5,000원, 플랫폼 B에도 블랙/M 60일 | 30·90일 최저가 정상 표시, 변형별 가격, 플랫폼별 비교 |
+| 램스울 니트 (SMP-KNIT-02) | 20일 | 30일·90일 "데이터 부족" |
+| 와이드 데님 (SMP-DNM-03) | 50일, 20~34일 전 공백 | 커버리지 기준 미달, 그래프 공백 |
+| 옥스포드 셔츠 (SMP-SHT-04) | 60일, 최근 3회 연속 실패 | "수집 실패" 배지, 마지막 성공가 + 경고 |
+| 캔버스 스니커즈 (SMP-SNK-05) | 40일, 3일 전부터 수집 없음 | "오래된 데이터" |
+| 집업 후드 (SMP-HD-06) | 100일, 10~15일 전 품절(이때 최저가), void 이상치 1건 | 품절 제외 규칙, void 제외 |
+
+수집 시각은 매일 09:00, 21:00(KST)이고, 날짜는 시드 실행 시점 기준 "N일 전"으로 계산한다.
 
 - 모든 샘플 상품은 `is_sample=true`, 가상 브랜드, `source='sample'`이다.
 - 삭제: append-only 트리거가 `price_snapshots` DELETE를 막으므로, 전용 함수 `purge_sample_data()`만 샘플 행(`source='sample'`) 삭제를 허용한다. 이 함수는 샘플 스냅샷 → 샘플 시도·실행 → `is_sample` 상품 순으로 삭제하며, 실제 수집 데이터는 건드리지 않는다.
