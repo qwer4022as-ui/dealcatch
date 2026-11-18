@@ -249,6 +249,12 @@ order by ps.listing_variant_id, ps.collected_at desc;
 
 모든 테이블에 RLS를 켠다. 정책이 없는 테이블은 anon이 접근할 수 없다.
 
+**권한(GRANT)은 자동으로 주어지지 않는다.** 이 프로젝트는 public 스키마의 새 테이블에 anon / authenticated / service_role 권한을 자동 부여하지 않는다(마이그레이션 `20261118021844_grant_api_roles.sql`에서 명시적으로 부여). 따라서:
+
+- 테이블·뷰를 추가하는 마이그레이션은 **같은 파일에서 권한도 부여**한다 (anon·authenticated는 SELECT만, service_role은 필요한 쓰기 권한).
+- 권한 확인: `has_table_privilege('anon', 'public.<table>', 'SELECT')`
+- 증상: 앱에서 `permission denied for table <table>` 오류가 나면 권한 누락이다.
+
 ## 7. 마이그레이션과 시드
 
 ```
