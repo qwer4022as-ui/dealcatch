@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
+import { AdminStatus } from "@/components/AdminStatus";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,6 +27,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             >
               상품
             </Link>
+            <div className="ml-auto">
+              <Suspense fallback={null}>
+                <AdminStatus />
+              </Suspense>
+            </div>
           </nav>
         </header>
         {children}
