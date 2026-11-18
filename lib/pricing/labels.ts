@@ -11,7 +11,9 @@ export interface BadgeLabel {
   tone: Tone;
 }
 
-export function healthBadge(stats: PriceStats, now: Date): BadgeLabel {
+export type HealthInfo = Pick<PriceStats, "health" | "consecutiveFailures" | "lastSuccessAt">;
+
+export function healthBadge(stats: HealthInfo, now: Date): BadgeLabel {
   switch (stats.health) {
     case "ok":
       return { text: "정상", tone: "ok" };
