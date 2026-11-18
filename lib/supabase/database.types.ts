@@ -267,6 +267,32 @@ export type Database = {
         }
         Relationships: []
       }
+      price_alerts: {
+        Row: {
+          product_id: number
+          target_price: number | null
+          updated_at: string
+        }
+        Insert: {
+          product_id: number
+          target_price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          product_id?: number
+          target_price?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_alerts_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       price_snapshots: {
         Row: {
           attempt_id: number
@@ -443,6 +469,7 @@ export type Database = {
           last_collected_at: string | null
           listing_variant_id: number | null
           low_at: string | null
+          low_first_at: string | null
           low_price: number | null
           record_count: number | null
         }

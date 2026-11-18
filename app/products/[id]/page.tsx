@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
 import { ListingCompare } from "@/components/ListingCompare";
+import { TargetPriceForm } from "@/components/TargetPriceForm";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceSummary } from "@/components/PriceSummary";
 import { SampleBanner } from "@/components/SampleBanner";
@@ -13,7 +14,9 @@ import { formatKRW, formatKstDateTime } from "@/lib/format";
 import { buildChartSeries } from "@/lib/pricing/chart";
 import { outcomeLabel, sourceBadge } from "@/lib/pricing/labels";
 import { computePriceStats } from "@/lib/pricing/stats";
+import { targetHit } from "@/lib/pricing/alerts";
 import { compareListings } from "@/lib/pricing/compare";
+import { getTarget } from "@/lib/repositories/alerts";
 import { getListingComparison, getProductDetail, getVariantHistory } from "@/lib/repositories/product-detail";
 
 const RECENT_LIMIT = 20;
@@ -45,6 +48,19 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
 
   const now = new Date();
   const compareRows = compareListings(await getListingComparison(product, now));
+  const admin = await isAdmin();
+  // 목표가는 관리자에게만 보인다 (price_alerts 는 서버 전용)
+  const target = admin && !product.isSample ? await getTarget(product.id) : null;
+  const alertVariants = product.variants.map((v) => ({
+    label: `${v.platformName} · ${v.optionLabel}`,
+    latestPrice: v.latestPrice,
+    latestStock: v.latestStock,
+    lowPrice: null,
+    lowFirstAt: null,
+    firstCollectedAt: null,
+  }));
+  const hit = targetHit({ productId: product.id, name: product.name, isSample: product.isSample, targetPrice: target, variants: alertVariants });
+  const inStock = product.variants.filter((v) => v.latestPrice !== null && v.latestStock !== "sold_out").map((v) => v.latestPrice as number);
 
   return (
     <>
@@ -106,10 +122,19 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
 
       <ListingCompare rows={compareRows} now={now} />
 
+      {admin && !product.isSample && (
+        <TargetPriceForm
+          productId={product.id}
+          target={target}
+          hit={hit && { label: hit.label, price: hit.price }}
+          cheapest={inStock.length ? Math.min(...inStock) : null}
+        />
+      )}
+
       {selected ? (
         <VariantSection
           productId={product.id}
-          canVoid={!product.isSample && (await isAdmin())}
+          canVoid={!product.isSample && admin}
           listingVariantId={selected.listingVariantId}
           listingId={selected.listingId}
           label={`${selected.platformName} · ${selected.optionLabel}`}

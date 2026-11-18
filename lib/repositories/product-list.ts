@@ -2,6 +2,7 @@ import "server-only";
 import { createReadClient } from "@/lib/supabase/server";
 import { sanitizeQuery } from "@/lib/search";
 import { summarizeProduct, type ProductSummary } from "@/lib/pricing/summary";
+import type { AlertVariant } from "@/lib/pricing/alerts";
 import type { CheckTarget } from "@/lib/pricing/checklist";
 import type { StockStatus } from "@/lib/pricing/types";
 
@@ -14,6 +15,8 @@ export interface ProductListItem {
   isSample: boolean;
   platformNames: string[];
   summary: ProductSummary;
+  /** 알림 판정용 옵션별 값 (lib/pricing/alerts) */
+  alertVariants: AlertVariant[];
 }
 
 function fail(what: string, error: { message: string }): never {
@@ -59,7 +62,7 @@ export async function listProducts(q: string | undefined, now: Date): Promise<Pr
     variantIds.length
       ? db
           .from("v_variant_price_summary")
-          .select("listing_variant_id, record_count, low_price, low_at, has_sample")
+          .select("listing_variant_id, record_count, low_price, low_at, low_first_at, first_collected_at, has_sample")
           .in("listing_variant_id", variantIds)
       : Promise.resolve({ data: [], error: null }),
     listingIds.length
@@ -104,6 +107,21 @@ export async function listProducts(q: string | undefined, now: Date): Promise<Pr
       };
     });
 
+    const alertVariants: AlertVariant[] = p.listings.flatMap((l) =>
+      l.listing_variants.map((v) => {
+        const lp = latest.get(v.id);
+        const sm = sums.get(v.id);
+        return {
+          label: `${l.platforms?.name ?? ""} · ${v.option_label_raw}`,
+          latestPrice: lp?.sale_price ?? null,
+          latestStock: lp?.stock_status ?? null,
+          lowPrice: sm?.low_price ?? null,
+          lowFirstAt: toDate(sm?.low_first_at),
+          firstCollectedAt: toDate(sm?.first_collected_at),
+        };
+      }),
+    );
+
     return {
       id: p.id,
       name: p.name,
@@ -113,6 +131,7 @@ export async function listProducts(q: string | undefined, now: Date): Promise<Pr
       isSample: p.is_sample,
       platformNames: [...new Set(p.listings.map((l) => l.platforms?.name ?? ""))].filter(Boolean),
       summary: summarizeProduct(variants, listings, now),
+      alertVariants,
     };
   });
 }
