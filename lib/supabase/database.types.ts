@@ -463,16 +463,13 @@ export type Database = {
         Args: { p_collected_at: string; p_items: Json; p_listing_id: number }
         Returns: number
       }
-      register_product: {
+      register_product_listings: {
         Args: {
           p_brand_name: string
           p_category: string
-          p_external_id: string
+          p_listings: Json
           p_model_no: string
-          p_platform_code: string
           p_product_name: string
-          p_url: string
-          p_variants: Json
         }
         Returns: Json
       }

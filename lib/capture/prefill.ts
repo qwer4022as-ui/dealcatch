@@ -1,0 +1,85 @@
+// 검증된 북마클릿 값 → 폼 기본값 (순수 함수)
+
+import { formatKRW } from "@/lib/format";
+import { parseOptions, type ProductFormValues } from "@/lib/forms/product";
+import { normalizeOptionLabel, optionsToText, type CapturePayload } from "./payload";
+
+export function registerDefaults(p: CapturePayload): ProductFormValues {
+  const optionsText = optionsToText(p.options);
+  // 다른 색상의 사이즈는 현재 페이지 사이즈와 같다고 보고 채운다 (등록 전 사용자가 확인·수정)
+  const sizes = [...new Set(parseOptions(optionsText).variants.map((v) => v.size).filter(Boolean))].join(", ");
+  return {
+    url: p.url,
+    brand: p.brand,
+    name: p.name,
+    modelNo: p.modelNo,
+    category: "",
+    options: optionsText,
+    siblings: p.siblings.map((sb) => ({
+      on: true,
+      url: sb.url,
+      color: sb.color,
+      sizes,
+      note: [sb.salePrice !== null ? formatKRW(sb.salePrice) : null, sb.soldOut === true ? "품절" : null]
+        .filter(Boolean)
+        .join(" · "),
+    })),
+  };
+}
+
+export interface PriceDefaults {
+  /** PriceForm 의 name → 값 */
+  values: Record<string, string>;
+  /** 가져온 옵션 중 등록된 옵션과 이름이 맞지 않은 것 */
+  unmatched: string[];
+}
+
+/**
+ * 무신사는 보통 옵션별 가격이 같으므로 가져온 판매가·정가를 모든 옵션에 채운다. 추가금이 있는 옵션은 비운다.
+ * 재고는 이름이 맞고 품절 여부를 아는 옵션만 반영하고, 그 외는 "모름"으로 둔다.
+ */
+export function priceDefaults(
+  p: CapturePayload,
+  variants: { listingVariantId: number; optionLabel: string }[],
+): PriceDefaults {
+  const byLabel = new Map(p.options.map((o) => [normalizeOptionLabel(o.label), o]));
+  const matched = new Set<string>();
+  const values: Record<string, string> = {};
+
+  for (const v of variants) {
+    const key = normalizeOptionLabel(v.optionLabel);
+    const opt = byLabel.get(key);
+    if (opt) matched.add(key);
+    // 추가금이 있는 옵션은 기본 가격과 다르므로 비워 두고 직접 입력하게 한다
+    const hasExtra = opt?.extraPrice != null && opt.extraPrice !== 0;
+    if (!hasExtra && p.salePrice !== null) values[`sale_${v.listingVariantId}`] = String(p.salePrice);
+    if (!hasExtra && p.listPrice !== null) values[`list_${v.listingVariantId}`] = String(p.listPrice);
+    // 재고는 페이지가 알려 준 경우에만 채우고, 모르면 "모름" (추측하지 않는다)
+    values[`stock_${v.listingVariantId}`] =
+      opt?.soldOut === true ? "sold_out" : opt?.soldOut === false ? "in_stock" : "unknown";
+  }
+
+  const unmatched = p.options.filter((o) => !matched.has(normalizeOptionLabel(o.label))).map((o) => o.label);
+  return { values, unmatched };
+}
+
+/**
+ * 판매처 URL 에 맞는 기본값. 현재 페이지면 priceDefaults, 다른 색상 페이지면 그 색상의 가격을 모든 옵션에 채운다.
+ * 다른 색상의 재고는 그 색상 전체가 품절일 때만 품절, 나머지는 "모름". 맞는 페이지가 없으면 null.
+ */
+export function priceDefaultsForListing(
+  p: CapturePayload,
+  listingUrl: string,
+  variants: { listingVariantId: number; optionLabel: string }[],
+): PriceDefaults | null {
+  if (p.url === listingUrl) return priceDefaults(p, variants);
+  const sb = p.siblings.find((x) => x.url === listingUrl);
+  if (!sb) return null;
+  const values: Record<string, string> = {};
+  for (const v of variants) {
+    if (sb.salePrice !== null) values[`sale_${v.listingVariantId}`] = String(sb.salePrice);
+    if (sb.listPrice !== null) values[`list_${v.listingVariantId}`] = String(sb.listPrice);
+    values[`stock_${v.listingVariantId}`] = sb.soldOut === true ? "sold_out" : "unknown";
+  }
+  return { values, unmatched: [] };
+}
