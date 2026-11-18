@@ -168,6 +168,8 @@ type AdapterResult<T> =
 
 **초기 선택**: Vercel Cron → `/api/cron/collect`. 제한에 걸리면 GitHub Actions가 같은 엔드포인트를 호출하도록 바꾼다. 엔드포인트는 `Authorization: Bearer ${CRON_SECRET}`로 보호한다.
 
+> **현재 상태 (2026-11-18)**: 정책 검토 결과 자동 수집 대상 플랫폼이 없어 스케줄러와 `/api/cron/collect` 는 만들지 않았다 ([무신사](platform-reviews/musinsa.md), [네이버 쇼핑 API](platform-reviews/naver-shopping.md)). 가격은 수동 입력과 북마클릿(`lib/capture/`)으로 기록한다. 허용된 수집 경로가 생기면 이 절의 설계대로 추가한다.
+
 ## 8. 보안과 환경변수
 
 | 변수 | 노출 범위 | 용도 |
@@ -218,7 +220,7 @@ type AdapterResult<T> =
 4. 읽기 화면(목록, 상세, 그래프)
 5. 쓰기(등록, 수동 입력) + 간이 인증
 6. 수집 상태 화면
-7. 어댑터 + 크론 (정책 검토 통과 시)
+7. ~~어댑터 + 크론~~ → 정책 검토 결과 자동 수집 없음. 수동 입력 + 북마클릿, "오늘 확인할 상품" 목록
 8. Vercel 배포 (4단계 이후 언제든 가능, 일찍 할수록 좋음)
 
 ## 12. 예상 기술적 문제
