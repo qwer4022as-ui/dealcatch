@@ -29,6 +29,24 @@ npm run lint && npm run typecheck && npm test && npm run build
 git push -u origin feature/기능이름   # 이후 GitHub에서 PR 생성 · merge
 ```
 
+## 데이터베이스 (Supabase)
+
+스키마는 `supabase/migrations/`로만 변경한다. 대시보드에서 직접 테이블을 고치지 않는다.
+Supabase CLI 3.x는 기본 대상이 로컬 DB이므로, 클라우드 프로젝트에는 항상 `--remote`를 붙인다.
+
+```bash
+npx supabase login                                   # 기기마다 1회 (브라우저 인증)
+npx supabase link --project-ref <프로젝트 ref>        # 기기마다 1회 (DB 비밀번호 입력)
+
+npx supabase migration new <이름>                     # 새 마이그레이션 파일 생성
+npx supabase db push --remote --dry-run              # 적용될 내용 미리 보기
+npx supabase db push --remote                        # 적용
+npx supabase db push --remote --include-seed         # 빈 DB에 샘플 데이터까지 적용
+npx supabase db advisors --remote                    # 보안·성능 점검
+```
+
+샘플 데이터 삭제: SQL Editor에서 `select public.purge_sample_data();` (실제 데이터는 남는다)
+
 ## 스크립트
 
 | 명령 | 설명 |
