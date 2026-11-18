@@ -9,7 +9,7 @@ const valid = {
   modelNo: "AB-1234",
   salePrice: "129,000",
   listPrice: 189000,
-  options: [{ label: "블랙 / M", soldOut: false }, { label: "블랙 / L", soldOut: true }, { label: "블랙 / M" }],
+  options: [{ label: "블랙 / M", soldOut: false }, { label: "블랙 / L", soldOut: true }, { label: "블랙 / M" }, { label: "블랙 / XL" }],
 };
 
 describe("decodeCapture", () => {
@@ -25,7 +25,11 @@ describe("decodeCapture", () => {
         modelNo: "AB-1234",
         salePrice: 129000,
         listPrice: 189000,
-        options: [{ label: "블랙 / M", soldOut: false }, { label: "블랙 / L", soldOut: true }],
+        options: [
+          { label: "블랙 / M", soldOut: false },
+          { label: "블랙 / L", soldOut: true },
+          { label: "블랙 / XL", soldOut: null },
+        ],
       },
     });
   });

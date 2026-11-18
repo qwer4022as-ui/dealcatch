@@ -53,7 +53,7 @@ export function PriceForm({
     <form key={JSON.stringify(values)} action={formAction} className="flex flex-col gap-4">
       {prefill && !submitted && (
         <div className="rounded-md bg-sky-50 px-4 py-2 text-sm text-sky-900 dark:bg-sky-950 dark:text-sky-100">
-          ⓘ 무신사 페이지에서 가져온 가격을 채웠습니다. 화면과 같은지 확인한 뒤 저장하세요.
+          ⓘ 무신사 페이지에서 가져온 가격을 채웠습니다. 화면과 같은지 확인한 뒤 저장하세요. 옵션별 재고는 페이지에서 알 수 없을 때 &quot;모름&quot;으로 두었으니 필요하면 바꿔 주세요.
           {prefill.unmatched.length > 0 && (
             <div className="mt-1 text-xs">등록되지 않은 옵션: {prefill.unmatched.join(", ")}</div>
           )}

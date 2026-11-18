@@ -11,7 +11,8 @@ const MAX_PRICE = 100_000_000;
 
 export interface CaptureOption {
   label: string;
-  soldOut: boolean;
+  /** 품절 여부. 페이지에서 알 수 없으면 null (추측하지 않는다) */
+  soldOut: boolean | null;
 }
 
 export interface CapturePayload {
@@ -69,7 +70,8 @@ export function decodeCapture(encoded: string): CaptureResult {
     const label = str((o as Record<string, unknown>)?.label, 60);
     if (!label || seen.has(label)) continue;
     seen.add(label);
-    options.push({ label, soldOut: (o as Record<string, unknown>)?.soldOut === true });
+    const so = (o as Record<string, unknown>)?.soldOut;
+    options.push({ label, soldOut: so === true ? true : so === false ? false : null });
   }
 
   let sale = price(r.salePrice);

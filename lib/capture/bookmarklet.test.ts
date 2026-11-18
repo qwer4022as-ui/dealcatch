@@ -18,10 +18,26 @@ const MUSINSA_META: Record<string, string> = {
 };
 
 /** 실제 북마클릿 코드를 가짜 페이지 환경에서 실행 */
-function run(meta: Record<string, string>, hostname = "www.musinsa.com") {
+// 사용자가 확인한 __NEXT_DATA__ 구조 (필요한 부분만). 다른 상품(추천 등) 데이터가 앞에 있어도 goodsNo 로 구분
+const NEXT_DATA = JSON.stringify({
+  props: {
+    pageProps: {
+      dehydratedState: {
+        queries: [
+          { state: { data: { data: { goodsNo: 9999999, styleNo: "OTHER-ITEM" } } } },
+          { state: { data: null } },
+          { state: { data: { data: { goodsNo: 7160101, goodsNm: "H-Tech Double Face", styleNo: "HGF1HZ333BBK" } } } },
+        ],
+      },
+    },
+  },
+});
+
+function run(meta: Record<string, string>, hostname = "www.musinsa.com", nextData: string | null = NEXT_DATA) {
   const open = vi.fn();
   const alert = vi.fn();
   const document = {
+    getElementById: (id: string) => (id === "__NEXT_DATA__" && nextData !== null ? { textContent: nextData } : null),
     querySelector: (sel: string) => {
       const m = sel.match(/^meta\[property="(.+)"\]$/);
       const v = m ? meta[m[1]] : undefined;
@@ -52,7 +68,7 @@ describe("북마클릿 (실제 코드 실행)", () => {
         url: "https://www.musinsa.com/products/7160101",
         name: "H-Tech Double Face Balaclava Zip-Up Hoodie Black",
         brand: "피뎁트 모터사이클",
-        modelNo: "",
+        modelNo: "HGF1HZ333BBK",
         salePrice: 115400,
         listPrice: 129900,
         options: [],
@@ -76,6 +92,22 @@ describe("북마클릿 (실제 코드 실행)", () => {
     const { open } = run({ ...MUSINSA_META, "og:title": "기본 티셔츠 | 무신사" });
     const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
     expect(r.ok && r.value.name).toBe("기본 티셔츠");
+  });
+});
+
+describe("북마클릿 품번 읽기", () => {
+  const modelOf = (nextData: string | null) => {
+    const { open } = run(MUSINSA_META, "www.musinsa.com", nextData);
+    const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
+    return r.ok ? r.value.modelNo : "FAIL";
+  };
+  it("페이지 데이터가 없거나 깨져도 품번만 비우고 계속 진행", () => {
+    expect(modelOf(null)).toBe("");
+    expect(modelOf("{not json")).toBe("");
+    expect(modelOf(JSON.stringify({ props: {} }))).toBe("");
+  });
+  it("같은 상품 번호가 없으면 다른 상품의 품번을 쓰지 않음", () => {
+    expect(modelOf(NEXT_DATA.replace("7160101", "1234567"))).toBe("");
   });
 });
 

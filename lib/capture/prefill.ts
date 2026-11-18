@@ -23,7 +23,7 @@ export interface PriceDefaults {
 
 /**
  * 무신사는 보통 옵션별 가격이 같으므로 가져온 판매가·정가를 모든 옵션에 채운다.
- * 재고는 이름이 맞는 옵션만 반영하고, 맞지 않으면 "모름"으로 둔다.
+ * 재고는 이름이 맞고 품절 여부를 아는 옵션만 반영하고, 그 외는 "모름"으로 둔다.
  */
 export function priceDefaults(
   p: CapturePayload,
@@ -39,7 +39,9 @@ export function priceDefaults(
     if (opt) matched.add(key);
     if (p.salePrice !== null) values[`sale_${v.listingVariantId}`] = String(p.salePrice);
     if (p.listPrice !== null) values[`list_${v.listingVariantId}`] = String(p.listPrice);
-    values[`stock_${v.listingVariantId}`] = opt ? (opt.soldOut ? "sold_out" : "in_stock") : p.options.length ? "unknown" : "in_stock";
+    // 재고는 페이지가 알려 준 경우에만 채우고, 모르면 "모름" (추측하지 않는다)
+    values[`stock_${v.listingVariantId}`] =
+      opt?.soldOut === true ? "sold_out" : opt?.soldOut === false ? "in_stock" : "unknown";
   }
 
   const unmatched = p.options.filter((o) => !matched.has(normalizeOptionLabel(o.label))).map((o) => o.label);
