@@ -47,7 +47,17 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
 
       <header className="flex flex-col gap-1">
         <div className="text-sm text-zinc-600 dark:text-zinc-400">{product.brandName}</div>
-        <h1 className="text-2xl font-semibold">{product.name}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-semibold">{product.name}</h1>
+          {!product.isSample && (
+            <Link
+              href={`/products/${product.id}/prices/new${selected ? `?listing=${selected.listingId}` : ""}`}
+              className="rounded-md px-3 py-1 text-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800"
+            >
+              수동 가격 입력
+            </Link>
+          )}
+        </div>
         <div className="flex flex-wrap gap-x-3 text-sm text-zinc-600 dark:text-zinc-400">
           {product.modelNo && <span>모델번호 {product.modelNo}</span>}
           {product.category && <span>{product.category}</span>}

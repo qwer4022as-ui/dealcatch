@@ -459,6 +459,23 @@ export type Database = {
     }
     Functions: {
       purge_sample_data: { Args: never; Returns: Json }
+      record_manual_prices: {
+        Args: { p_collected_at: string; p_items: Json; p_listing_id: number }
+        Returns: number
+      }
+      register_product: {
+        Args: {
+          p_brand_name: string
+          p_category: string
+          p_external_id: string
+          p_model_no: string
+          p_platform_code: string
+          p_product_name: string
+          p_url: string
+          p_variants: Json
+        }
+        Returns: Json
+      }
     }
     Enums: {
       attempt_outcome:
