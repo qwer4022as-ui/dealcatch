@@ -26,16 +26,18 @@ const NEXT_DATA = JSON.stringify({
         queries: [
           { state: { data: { data: { goodsNo: 9999999, styleNo: "OTHER-ITEM" } } } },
           { state: { data: null } },
+          // 상세 정보 항목: 품번은 있고 옵션은 없음
+          { state: { data: { data: { goodsNo: 7160101, goodsNm: "H-Tech Double Face", styleNo: "HGF1HZ333BBK" } } } },
+          // 옵션 항목: 맨 위 goodsNo 없음, 옵션마다 goodsNo (사용자가 확인한 실제 구조)
           {
             state: {
               data: {
                 data: {
-                  goodsNo: 7160101,
-                  goodsNm: "H-Tech Double Face",
-                  styleNo: "HGF1HZ333BBK",
+                  basic: [{ no: 10613858, name: "사이즈", optionValues: [] }],
                   optionItems: ["S", "M", "L", "XL", "XXL"].map((size, i) => ({
                     no: 32720669 + i,
                     goodsNo: 7160101,
+                    managedCode: size,
                     price: 0,
                     activated: true,
                     isDeleted: size === "XXL",
@@ -131,8 +133,9 @@ describe("북마클릿 품번 읽기", () => {
 
 describe("북마클릿 옵션 읽기", () => {
   const optionsOf = (items: unknown[]) => {
+    const withGoods = items.map((it) => (it && typeof it === "object" ? { goodsNo: 7160101, ...it } : it));
     const nd = JSON.stringify({
-      props: { pageProps: { dehydratedState: { queries: [{ state: { data: { data: { goodsNo: 7160101, optionItems: items } } } }] } } },
+      props: { pageProps: { dehydratedState: { queries: [{ state: { data: { data: { optionItems: withGoods } } } }] } } },
     });
     const { open } = run(MUSINSA_META, "www.musinsa.com", nd);
     const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
@@ -147,6 +150,11 @@ describe("북마클릿 옵션 읽기", () => {
     ).toEqual([
       { label: "블랙 / XL", soldOut: null, extraPrice: 5000 },
       { label: "네이비 /", soldOut: null, extraPrice: 0 },
+    ]);
+  });
+  it("다른 상품의 옵션(추천 상품 등)은 쓰지 않음", () => {
+    expect(optionsOf([{ goodsNo: 1234567, optionValues: [{ name: "M" }] }, { optionValues: [{ name: "L" }] }])).toEqual([
+      { label: "L", soldOut: null, extraPrice: null },
     ]);
   });
   it("형식이 이상한 옵션은 건너뜀", () => {
