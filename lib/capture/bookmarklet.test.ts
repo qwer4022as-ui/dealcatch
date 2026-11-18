@@ -34,6 +34,10 @@ const NEXT_DATA = JSON.stringify({
               data: {
                 data: {
                   basic: [{ no: 10613858, name: "사이즈", optionValues: [] }],
+                  colorImages: [
+                    { colorId: "1", colorName: "흰색" },
+                    { colorId: "2", colorName: "블랙" },
+                  ],
                   optionItems: ["S", "M", "L", "XL", "XXL"].map((size, i) => ({
                     no: 32720669 + i,
                     goodsNo: 7160101,
@@ -42,6 +46,7 @@ const NEXT_DATA = JSON.stringify({
                     activated: true,
                     isDeleted: size === "XXL",
                     optionValues: [{ no: 24993702 + i, name: size, code: size, optionNo: 10613858, optionName: "사이즈" }],
+                    colors: [{ optionItemNo: 32720669 + i, colorCode: "2", colorType: "MUSINSA" }],
                   })),
                 },
               },
@@ -91,7 +96,7 @@ describe("북마클릿 (실제 코드 실행)", () => {
         modelNo: "HGF1HZ333BBK",
         salePrice: 115400,
         listPrice: 129900,
-        options: ["S", "M", "L", "XL"].map((label) => ({ label, soldOut: null, extraPrice: 0 })),
+        options: ["S", "M", "L", "XL"].map((size) => ({ label: `블랙 / ${size}`, soldOut: null, extraPrice: 0 })),
       },
     });
   });
@@ -151,6 +156,35 @@ describe("북마클릿 옵션 읽기", () => {
       { label: "블랙 / XL", soldOut: null, extraPrice: 5000 },
       { label: "네이비 /", soldOut: null, extraPrice: 0 },
     ]);
+  });
+  it("색상 선택 옵션이 없으면 색상 분류 코드 → 이름, 표에 없으면 비움", () => {
+    const nd = JSON.stringify({
+      props: {
+        pageProps: {
+          dehydratedState: {
+            queries: [
+              { state: { data: { data: { colorImages: [{ colorId: "2", colorName: "블랙" }] } } } },
+              {
+                state: {
+                  data: {
+                    data: {
+                      optionItems: [
+                        { goodsNo: 7160101, optionValues: [{ name: "M", optionName: "사이즈" }], colors: [{ colorCode: "2" }] },
+                        { goodsNo: 7160101, optionValues: [{ name: "L", optionName: "사이즈" }], colors: [{ colorCode: "99" }] },
+                        { goodsNo: 7160101, optionValues: [{ name: "아이보리", optionName: "COLOR" }, { name: "S", optionName: "SIZE" }], colors: [{ colorCode: "2" }] },
+                      ],
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    const { open } = run(MUSINSA_META, "www.musinsa.com", nd);
+    const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
+    expect(r.ok && r.value.options.map((o) => o.label)).toEqual(["블랙 / M", "L", "아이보리 / S"]);
   });
   it("다른 상품의 옵션(추천 상품 등)은 쓰지 않음", () => {
     expect(optionsOf([{ goodsNo: 1234567, optionValues: [{ name: "M" }] }, { optionValues: [{ name: "L" }] }])).toEqual([

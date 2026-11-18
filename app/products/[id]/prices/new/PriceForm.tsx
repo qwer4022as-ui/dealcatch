@@ -42,7 +42,8 @@ export function PriceForm({
     bigChanges: [],
     values: {},
   });
-  const captured = useCapturedPayload();
+  // 등록 화면에서 넘어온 경우 이 탭에 보관된 북마클릿 값을 쓴다 (URL 이 같을 때만)
+  const captured = useCapturedPayload({ useStored: true });
   const sameListing = captured.payload !== null && captured.payload.url === listingUrl;
   const prefill = sameListing && captured.payload ? priceDefaults(captured.payload, variants) : null;
   const submitted = Object.keys(state.values).length > 0;
@@ -59,7 +60,7 @@ export function PriceForm({
           )}
         </div>
       )}
-      {captured.payload && !sameListing && (
+      {captured.payload && !sameListing && captured.source === "hash" && (
         <div role="alert" className="rounded-md bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
           ◐ 가져온 상품이 이 판매처와 달라서 값을 채우지 않았습니다.
         </div>
