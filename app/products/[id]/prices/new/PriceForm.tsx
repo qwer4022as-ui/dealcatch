@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { priceDefaults } from "@/lib/capture/prefill";
+import { useCapturedPayload } from "@/lib/capture/useCapturedPayload";
 import { formatKRW } from "@/lib/format";
 import { recordPricesAction, type PriceFormState } from "./actions";
 
@@ -25,9 +27,12 @@ export function PriceForm({
   listingId,
   variants,
   defaultCollectedAt,
+  listingUrl,
 }: {
   productId: number;
   listingId: number;
+  /** 북마클릿 값의 상품 URL 이 이 판매처와 같을 때만 미리 채운다 */
+  listingUrl: string;
   variants: PriceFormVariant[];
   defaultCollectedAt: string;
 }) {
@@ -37,10 +42,33 @@ export function PriceForm({
     bigChanges: [],
     values: {},
   });
-  const val = (name: string, fallback = "") => state.values[name] ?? fallback;
+  const captured = useCapturedPayload();
+  const sameListing = captured.payload !== null && captured.payload.url === listingUrl;
+  const prefill = sameListing && captured.payload ? priceDefaults(captured.payload, variants) : null;
+  const submitted = Object.keys(state.values).length > 0;
+  const values = submitted ? state.values : (prefill?.values ?? {});
+  const val = (name: string, fallback = "") => values[name] ?? fallback;
 
   return (
-    <form key={JSON.stringify(state.values)} action={formAction} className="flex flex-col gap-4">
+    <form key={JSON.stringify(values)} action={formAction} className="flex flex-col gap-4">
+      {prefill && !submitted && (
+        <div className="rounded-md bg-sky-50 px-4 py-2 text-sm text-sky-900 dark:bg-sky-950 dark:text-sky-100">
+          ⓘ 무신사 페이지에서 가져온 가격을 채웠습니다. 화면과 같은지 확인한 뒤 저장하세요.
+          {prefill.unmatched.length > 0 && (
+            <div className="mt-1 text-xs">등록되지 않은 옵션: {prefill.unmatched.join(", ")}</div>
+          )}
+        </div>
+      )}
+      {captured.payload && !sameListing && (
+        <div role="alert" className="rounded-md bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+          ◐ 가져온 상품이 이 판매처와 달라서 값을 채우지 않았습니다.
+        </div>
+      )}
+      {captured.error && (
+        <div role="alert" className="rounded-md bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+          ◐ {captured.error}
+        </div>
+      )}
       {state.errors.length > 0 && (
         <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200">
           <ul className="list-inside list-disc space-y-1">

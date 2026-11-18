@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { registerDefaults } from "@/lib/capture/prefill";
+import { useCapturedPayload } from "@/lib/capture/useCapturedPayload";
 import { CATEGORIES } from "@/lib/forms/product";
 import { registerProductAction, type RegisterState } from "./actions";
 
@@ -28,12 +30,24 @@ function Field({ id, label, hint, children }: { id: string; label: string; hint?
 
 export function RegisterForm({ brands }: { brands: string[] }) {
   const [state, formAction, pending] = useActionState(registerProductAction, empty);
-  const v = state.values;
+  const captured = useCapturedPayload();
+  // 제출 전에는 북마클릿 값, 제출 후에는 사용자가 보낸 값을 유지
+  const v = state === empty && captured.payload ? registerDefaults(captured.payload) : state.values;
   // 오류 후 입력값을 유지하기 위해 제출할 때마다 폼을 다시 그린다
   const formKey = JSON.stringify(v);
 
   return (
     <form key={formKey} action={formAction} className="flex max-w-2xl flex-col gap-4">
+      {captured.payload && state === empty && (
+        <div className="rounded-md bg-sky-50 px-4 py-2 text-sm text-sky-900 dark:bg-sky-950 dark:text-sky-100">
+          ⓘ 무신사 페이지에서 가져온 값을 채웠습니다. 화면과 같은지 확인하고 카테고리를 고른 뒤 등록하세요.
+        </div>
+      )}
+      {captured.error && (
+        <div role="alert" className="rounded-md bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+          ◐ {captured.error}
+        </div>
+      )}
       {state.errors.length > 0 && (
         <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950 dark:text-red-200">
           <ul className="list-inside list-disc space-y-1">

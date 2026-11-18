@@ -90,6 +90,7 @@ async function NewPriceBody({ params, searchParams }: PageProps<"/products/[id]/
           latestPrice: v.latestPrice,
         }))}
         defaultCollectedAt={toKstLocal(new Date())}
+        listingUrl={current.url}
       />
     </>
   );
