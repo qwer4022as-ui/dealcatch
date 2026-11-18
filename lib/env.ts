@@ -15,3 +15,12 @@ export function getServerEnv() {
     supabaseAnonKey: required("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
   };
 }
+
+/** 관리자 화면 보호용 토큰. 짧은 값은 추측될 수 있으므로 거부한다. */
+export function getAdminToken(): string {
+  const token = required("ADMIN_TOKEN");
+  if (token.length < 16) {
+    throw new Error("ADMIN_TOKEN 은 16자 이상이어야 합니다. `openssl rand -base64 32` 로 생성해 주세요.");
+  }
+  return token;
+}
