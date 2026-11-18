@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
 import { PriceChart } from "@/components/PriceChart";
 import { PriceSummary } from "@/components/PriceSummary";
+import { SampleBanner } from "@/components/SampleBanner";
 import { formatKRW, formatKstDateTime } from "@/lib/format";
 import { buildChartSeries } from "@/lib/pricing/chart";
 import { outcomeLabel, sourceBadge } from "@/lib/pricing/labels";
@@ -42,11 +43,7 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
 
   return (
     <>
-      {product.isSample && (
-        <div className="rounded-md bg-violet-50 px-4 py-2 text-sm text-violet-900 dark:bg-violet-950 dark:text-violet-100">
-          ◇ 샘플 데이터입니다. 가상 브랜드·가상 상품이며 실제 가격 이력이 아닙니다.
-        </div>
-      )}
+      {product.isSample && <SampleBanner />}
 
       <header className="flex flex-col gap-1">
         <div className="text-sm text-zinc-600 dark:text-zinc-400">{product.brandName}</div>

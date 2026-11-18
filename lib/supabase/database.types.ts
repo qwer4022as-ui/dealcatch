@@ -427,6 +427,7 @@ export type Database = {
       v_listing_health: {
         Row: {
           consecutive_failures: number | null
+          failures_since_success: number | null
           last_attempt_at: string | null
           last_outcome: Database["public"]["Enums"]["attempt_outcome"] | null
           last_success_at: string | null
@@ -434,6 +435,26 @@ export type Database = {
           status: Database["public"]["Enums"]["listing_status"] | null
         }
         Relationships: []
+      }
+      v_variant_price_summary: {
+        Row: {
+          first_collected_at: string | null
+          has_sample: boolean | null
+          last_collected_at: string | null
+          listing_variant_id: number | null
+          low_at: string | null
+          low_price: number | null
+          record_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_snapshots_listing_variant_id_fkey"
+            columns: ["listing_variant_id"]
+            isOneToOne: false
+            referencedRelation: "listing_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

@@ -2,20 +2,18 @@
 // 원칙: 수집하지 않은 가격을 만들거나 보간하지 않는다. 조건 미달이면 "데이터 부족"으로 돌려준다.
 // docs/PRD.md §3, §4 F4
 
+import { deriveHealth } from "./health";
 import { kstDateKey, kstStartOfDay } from "./kst";
 import {
   DEFAULT_PRICING_CONFIG,
   type CollectionAttempt,
   type CurrentPrice,
-  type Health,
   type LowPoint,
   type PriceSnapshot,
   type PriceStats,
   type PricingConfig,
   type WindowStat,
 } from "./types";
-
-const HOUR_MS = 60 * 60 * 1000;
 
 /** 소수 첫째 자리까지 반올림한 백분율 */
 export function pct(numerator: number, denominator: number): number {
@@ -113,16 +111,13 @@ export function computePriceStats(
       .filter((d): d is Date => d instanceof Date)
       .sort((a, b) => b.getTime() - a.getTime())[0] ?? null;
 
-  // 실패가 이어지고 있으면 기록 유무와 관계없이 "수집 실패"를 우선 표시한다
-  let health: Health;
-  if (consecutiveFailures > 0) health = "failing";
-  else if (!latest) health = "no_data";
-  else if (
-    lastSuccessAt &&
-    now.getTime() - lastSuccessAt.getTime() > config.staleAfterHours * HOUR_MS
-  )
-    health = "stale";
-  else health = "ok";
+  const health = deriveHealth({
+    consecutiveFailures,
+    hasRecords: latest !== null,
+    lastSuccessAt,
+    now,
+    staleAfterHours: config.staleAfterHours,
+  });
 
   return {
     current,
