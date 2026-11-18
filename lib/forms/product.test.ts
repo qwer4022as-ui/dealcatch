@@ -21,6 +21,9 @@ describe("parseOptions", () => {
   it("슬래시가 없으면 사이즈", () => {
     expect(parseOptions("FREE").variants).toEqual([{ color: "", size: "FREE", label: "FREE" }]);
   });
+  it("색상만 있는 옵션 (북마클릿이 '네이비 /' 로 넘김)", () => {
+    expect(parseOptions("네이비 /").variants).toEqual([{ color: "네이비", size: "", label: "네이비" }]);
+  });
   it("중복(대소문자 무시)·형식 오류·빈 입력", () => {
     expect(parseOptions("블랙 / m\n블랙/M").errors).toHaveLength(1);
     expect(parseOptions("a / b / c").errors).toHaveLength(1);

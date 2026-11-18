@@ -35,6 +35,7 @@ export type ProductValidation = { ok: true; value: ValidProduct } | { ok: false;
 
 /**
  * 옵션 입력: 한 줄에 하나, "색상 / 사이즈". 슬래시가 없으면 사이즈로 본다 (예: "FREE").
+ * 색상만 있으면 "네이비 /" 처럼 슬래시를 붙인다.
  * 같은 옵션이 두 번 나오면 오류.
  */
 export function parseOptions(text: string): { variants: VariantInput[]; errors: string[] } {
@@ -56,7 +57,7 @@ export function parseOptions(text: string): { variants: VariantInput[]; errors: 
       errors.push(`"${line}": 색상·사이즈는 각각 30자 이하로 입력해 주세요.`);
       continue;
     }
-    const label = color ? `${color} / ${size}` : size;
+    const label = color && size ? `${color} / ${size}` : color || size;
     const key = `${color.toLowerCase()}|${size.toLowerCase()}`;
     if (seen.has(key)) {
       errors.push(`"${label}" 옵션이 중복되었습니다.`);

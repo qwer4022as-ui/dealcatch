@@ -11,10 +11,10 @@ const p: CapturePayload = {
   salePrice: 129000,
   listPrice: 189000,
   options: [
-    { label: "블랙 / M", soldOut: false },
-    { label: "블랙 / L", soldOut: true },
-    { label: "네이비 / M", soldOut: false },
-    { label: "블랙 / XL", soldOut: null },
+    { label: "블랙 / M", soldOut: false, extraPrice: null },
+    { label: "블랙 / L", soldOut: true, extraPrice: null },
+    { label: "네이비 / M", soldOut: false, extraPrice: null },
+    { label: "블랙 / XL", soldOut: null, extraPrice: null },
   ],
 };
 
@@ -24,6 +24,16 @@ describe("registerDefaults", () => {
       url: p.url, brand: "테스트", name: "울 코트", modelNo: "AB-1", category: "",
       options: "블랙 / M\n블랙 / L\n네이비 / M\n블랙 / XL",
     });
+  });
+});
+
+describe("priceDefaults 추가금", () => {
+  it("추가금이 있는 옵션은 가격을 비우고, 0원은 그대로 채움", () => {
+    const r = priceDefaults(
+      { ...p, options: [{ label: "M", soldOut: null, extraPrice: 0 }, { label: "XL", soldOut: null, extraPrice: 5000 }] },
+      [{ listingVariantId: 1, optionLabel: "M" }, { listingVariantId: 2, optionLabel: "XL" }],
+    );
+    expect(r.values).toEqual({ sale_1: "129000", list_1: "189000", stock_1: "unknown", stock_2: "unknown" });
   });
 });
 

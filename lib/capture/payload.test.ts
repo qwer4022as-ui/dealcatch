@@ -9,7 +9,7 @@ const valid = {
   modelNo: "AB-1234",
   salePrice: "129,000",
   listPrice: 189000,
-  options: [{ label: "블랙 / M", soldOut: false }, { label: "블랙 / L", soldOut: true }, { label: "블랙 / M" }, { label: "블랙 / XL" }],
+  options: [{ label: "블랙 / M", soldOut: false, extraPrice: null }, { label: "블랙 / L", soldOut: true, extraPrice: null }, { label: "블랙 / M" }, { label: "블랙 / XL" }],
 };
 
 describe("decodeCapture", () => {
@@ -26,9 +26,9 @@ describe("decodeCapture", () => {
         salePrice: 129000,
         listPrice: 189000,
         options: [
-          { label: "블랙 / M", soldOut: false },
-          { label: "블랙 / L", soldOut: true },
-          { label: "블랙 / XL", soldOut: null },
+          { label: "블랙 / M", soldOut: false, extraPrice: null },
+          { label: "블랙 / L", soldOut: true, extraPrice: null },
+          { label: "블랙 / XL", soldOut: null, extraPrice: null },
         ],
       },
     });
@@ -75,6 +75,6 @@ describe("옵션 도우미", () => {
     expect(normalizeOptionLabel("BLACK-m")).toBe(normalizeOptionLabel("black / M"));
   });
   it("등록 폼 텍스트", () => {
-    expect(optionsToText([{ label: "블랙 / M", soldOut: false }, { label: "FREE", soldOut: false }])).toBe("블랙 / M\nFREE");
+    expect(optionsToText([{ label: "블랙 / M", soldOut: false, extraPrice: null }, { label: "FREE", soldOut: false, extraPrice: null }])).toBe("블랙 / M\nFREE");
   });
 });

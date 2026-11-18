@@ -13,6 +13,8 @@ export interface CaptureOption {
   label: string;
   /** 품절 여부. 페이지에서 알 수 없으면 null (추측하지 않는다) */
   soldOut: boolean | null;
+  /** 기본 가격 대비 옵션 추가금(원). 알 수 없으면 null */
+  extraPrice: number | null;
 }
 
 export interface CapturePayload {
@@ -71,7 +73,12 @@ export function decodeCapture(encoded: string): CaptureResult {
     if (!label || seen.has(label)) continue;
     seen.add(label);
     const so = (o as Record<string, unknown>)?.soldOut;
-    options.push({ label, soldOut: so === true ? true : so === false ? false : null });
+    const ep = (o as Record<string, unknown>)?.extraPrice;
+    options.push({
+      label,
+      soldOut: so === true ? true : so === false ? false : null,
+      extraPrice: typeof ep === "number" && Number.isSafeInteger(ep) && Math.abs(ep) <= MAX_PRICE ? ep : null,
+    });
   }
 
   let sale = price(r.salePrice);

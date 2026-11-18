@@ -26,7 +26,25 @@ const NEXT_DATA = JSON.stringify({
         queries: [
           { state: { data: { data: { goodsNo: 9999999, styleNo: "OTHER-ITEM" } } } },
           { state: { data: null } },
-          { state: { data: { data: { goodsNo: 7160101, goodsNm: "H-Tech Double Face", styleNo: "HGF1HZ333BBK" } } } },
+          {
+            state: {
+              data: {
+                data: {
+                  goodsNo: 7160101,
+                  goodsNm: "H-Tech Double Face",
+                  styleNo: "HGF1HZ333BBK",
+                  optionItems: ["S", "M", "L", "XL", "XXL"].map((size, i) => ({
+                    no: 32720669 + i,
+                    goodsNo: 7160101,
+                    price: 0,
+                    activated: true,
+                    isDeleted: size === "XXL",
+                    optionValues: [{ no: 24993702 + i, name: size, code: size, optionNo: 10613858, optionName: "사이즈" }],
+                  })),
+                },
+              },
+            },
+          },
         ],
       },
     },
@@ -71,7 +89,7 @@ describe("북마클릿 (실제 코드 실행)", () => {
         modelNo: "HGF1HZ333BBK",
         salePrice: 115400,
         listPrice: 129900,
-        options: [],
+        options: ["S", "M", "L", "XL"].map((label) => ({ label, soldOut: null, extraPrice: 0 })),
       },
     });
   });
@@ -108,6 +126,33 @@ describe("북마클릿 품번 읽기", () => {
   });
   it("같은 상품 번호가 없으면 다른 상품의 품번을 쓰지 않음", () => {
     expect(modelOf(NEXT_DATA.replace("7160101", "1234567"))).toBe("");
+  });
+});
+
+describe("북마클릿 옵션 읽기", () => {
+  const optionsOf = (items: unknown[]) => {
+    const nd = JSON.stringify({
+      props: { pageProps: { dehydratedState: { queries: [{ state: { data: { data: { goodsNo: 7160101, optionItems: items } } } }] } } },
+    });
+    const { open } = run(MUSINSA_META, "www.musinsa.com", nd);
+    const r = decodeCapture(open.mock.calls[0][0].split("#d=")[1]);
+    return r.ok ? r.value.options : "FAIL";
+  };
+  it("색상 + 사이즈 두 단계 옵션 → '색상 / 사이즈', 추가금 보존", () => {
+    expect(
+      optionsOf([
+        { price: 5000, optionValues: [{ name: "블랙", optionName: "색상" }, { name: "XL", optionName: "사이즈" }] },
+        { price: 0, optionValues: [{ name: "네이비", optionName: "컬러" }] },
+      ]),
+    ).toEqual([
+      { label: "블랙 / XL", soldOut: null, extraPrice: 5000 },
+      { label: "네이비 /", soldOut: null, extraPrice: 0 },
+    ]);
+  });
+  it("형식이 이상한 옵션은 건너뜀", () => {
+    expect(optionsOf([null, { optionValues: "x" }, { optionValues: [{ name: "  " }] }, { optionValues: [{ name: "FREE" }] }])).toEqual([
+      { label: "FREE", soldOut: null, extraPrice: null },
+    ]);
   });
 });
 
