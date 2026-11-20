@@ -485,9 +485,21 @@ export type Database = {
       }
     }
     Functions: {
+      capture_batch_save: {
+        Args: { p_collected_at: string; p_listings: Json; p_new_items: Json }
+        Returns: Json
+      }
       purge_sample_data: { Args: never; Returns: Json }
       record_manual_prices: {
         Args: { p_collected_at: string; p_items: Json; p_listing_id: number }
+        Returns: number
+      }
+      record_manual_prices_batch: {
+        Args: { p_collected_at: string; p_listings: Json }
+        Returns: number
+      }
+      register_and_record_batch: {
+        Args: { p_collected_at: string; p_items: Json }
         Returns: number
       }
       register_product_listings: {
