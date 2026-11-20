@@ -490,6 +490,10 @@ export type Database = {
         Args: { p_collected_at: string; p_items: Json; p_listing_id: number }
         Returns: number
       }
+      record_manual_prices_batch: {
+        Args: { p_collected_at: string; p_listings: Json }
+        Returns: number
+      }
       register_product_listings: {
         Args: {
           p_brand_name: string

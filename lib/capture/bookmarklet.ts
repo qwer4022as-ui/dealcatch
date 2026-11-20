@@ -27,15 +27,32 @@ var enc=btoa(s).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"");
 window.open(APP+"/capture#d="+enc,"_blank","noopener");
 })();`;
 
+/**
+ * 일괄 기록 북마클릿. 사용자가 보고 있는 무신사 목록 페이지(좋아요·추천·검색·브랜드 등) 1개에서,
+ * 버튼을 눌렀을 때만 상품 카드의 분석용 속성(data-item-id, data-price, data-original-price)을 읽는다.
+ * 판매가는 data-price(상세 페이지 product:price:amount 와 같은 기준)를 쓰고,
+ * 쿠폰·등급에 따라 달라지는 혜택가(data-best-price)는 쓰지 않는다. 네트워크 요청은 보내지 않는다.
+ */
+export const BATCH_BOOKMARKLET_SOURCE = `(function(){
+var APP=__APP__;
+if(!/(^|\\.)musinsa\\.com$/.test(location.hostname)){alert("무신사 페이지에서 눌러 주세요.");return;}
+var els=document.querySelectorAll("[data-item-id][data-price]"),items=[],seen={};
+for(var i=0;i<els.length&&items.length<200;i++){var e=els[i],id=e.getAttribute("data-item-id")||"";if(!/^\\d{1,12}$/.test(id)||seen[id])continue;seen[id]=1;var img=e.querySelector("img"),t=e.textContent||"";items.push({goodsNo:id,name:img&&img.getAttribute("alt")?img.getAttribute("alt"):"",brand:"",salePrice:e.getAttribute("data-price"),listPrice:e.getAttribute("data-original-price"),soldOut:/품절(?!\\s*임박)/.test(t)?true:null});}
+if(!items.length){alert("이 페이지에서 상품 가격 정보를 찾지 못했습니다. 상품 목록이 보이는 페이지에서 눌러 주세요.");return;}
+var b=new TextEncoder().encode(JSON.stringify({v:1,kind:"batch",items:items})),s="";for(var j=0;j<b.length;j++){s+=String.fromCharCode(b[j]);}
+var enc=btoa(s).replace(/\\+/g,"-").replace(/\\//g,"_").replace(/=+$/,"");
+window.open(APP+"/capture/batch#b="+enc,"_blank","noopener");
+})();`;
+
 const ORIGIN_RE = /^https?:\/\/[a-z0-9.-]+(:\d{1,5})?$/i;
 
 /** 앱 주소를 넣은 실행 코드. 주소 형식이 이상하면 거부한다 (Host 헤더 조작 대비) */
-export function buildBookmarkletCode(appOrigin: string): string {
+export function buildBookmarkletCode(appOrigin: string, source: string = BOOKMARKLET_SOURCE): string {
   if (!ORIGIN_RE.test(appOrigin)) throw new Error(`앱 주소 형식이 올바르지 않습니다: ${appOrigin}`);
-  return BOOKMARKLET_SOURCE.replace("__APP__", JSON.stringify(appOrigin)).replace(/\n/g, "");
+  return source.replace("__APP__", JSON.stringify(appOrigin)).replace(/\n/g, "");
 }
 
 /** 즐겨찾기에 넣을 javascript: 주소 */
-export function buildBookmarkletHref(appOrigin: string): string {
-  return `javascript:${encodeURIComponent(buildBookmarkletCode(appOrigin))}`;
+export function buildBookmarkletHref(appOrigin: string, source: string = BOOKMARKLET_SOURCE): string {
+  return `javascript:${encodeURIComponent(buildBookmarkletCode(appOrigin, source))}`;
 }
