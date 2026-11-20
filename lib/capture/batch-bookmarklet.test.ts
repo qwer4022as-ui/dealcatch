@@ -61,26 +61,45 @@ function run(cards: Card[], hostname = "www.musinsa.com", extra: { pathname?: st
 }
 
 describe("일괄 기록 북마클릿: 브랜드", () => {
-  const cards: Card[] = [
-    { attrs: { "data-item-id": "4494697", "data-price": "239600", "data-original-price": "599000" },
-      text: "다이나핏\nBLACKLIGHT (블랙라이트) 여성 롱다운\n60%\n239,600원", alt: "BLACKLIGHT (블랙라이트) 여성 롱다운" },
-    { attrs: { "data-item-id": "7208075", "data-price": "84900", "data-original-price": "99900" },
-      text: "", alt: "Storm Shield Parka Black" },
-  ];
   const brands = (r: ReturnType<typeof run>) => {
     const d = decodeBatch(r.open.mock.calls[0][0].split("#b=")[1]);
     return d.ok ? d.items.map((i) => [i.externalId, i.brand, i.name]) : "FAIL";
   };
-  it("카드 첫 줄을 브랜드로 (가격·% 줄과 상품명 제외)", () => {
-    expect(brands(run(cards, "www.musinsa.com", { tree: true }))).toEqual([
-      ["4494697", "다이나핏", "BLACKLIGHT (블랙라이트) 여성 롱다운"],
-      ["7208075", "", "Storm Shield Parka Black"],
+
+  it("브랜드 페이지 (사용자 확인 데이터): 카드의 순위·배지가 아니라 페이지 제목의 브랜드", () => {
+    const cards: Card[] = [
+      { attrs: { "data-item-id": "7208075", "data-price": "249900", "data-original-price": "280800" },
+        text: "1\nStorm Shield Parka Black\n11%\n249,900원\n내일도착", alt: "Storm Shield Parka Black" },
+      { attrs: { "data-item-id": "4345364", "data-price": "89000", "data-original-price": "100000" },
+        text: "2\nHonda Small Wing Rivet point Hoodie Black\n11%\n89,000원", alt: "Honda Small Wing Rivet point Hoodie Black" },
+    ];
+    expect(
+      brands(run(cards, "www.musinsa.com", { tree: true, pathname: "/brand/hondaxphyps", ogTitle: "피뎁트 모터사이클(PHYPS MOTORCYCLE) | 무신사 추천 브랜드" })),
+    ).toEqual([
+      ["7208075", "피뎁트 모터사이클", "Storm Shield Parka Black"],
+      ["4345364", "피뎁트 모터사이클", "Honda Small Wing Rivet point Hoodie Black"],
     ]);
   });
-  it("브랜드 페이지면 카드에서 못 찾은 브랜드를 페이지 제목으로", () => {
-    expect(brands(run(cards, "www.musinsa.com", { tree: true, pathname: "/brand/hondaxphyps", ogTitle: "피뎁트 모터사이클(PHYPS MOTORCYCLE) | 무신사" }))).toEqual([
-      ["4494697", "다이나핏", "BLACKLIGHT (블랙라이트) 여성 롱다운"],
-      ["7208075", "피뎁트 모터사이클", "Storm Shield Parka Black"],
+
+  it("다른 페이지: 상품명 바로 윗줄만, 숫자·배지면 비움", () => {
+    const cards: Card[] = [
+      { attrs: { "data-item-id": "1", "data-price": "239600", "data-original-price": "599000" },
+        text: "다이나핏\nBLACKLIGHT 롱다운\n60%\n239,600원", alt: "BLACKLIGHT 롱다운" },
+      { attrs: { "data-item-id": "2", "data-price": "84900", "data-original-price": "99900" },
+        text: "최저가 도전\n다이나핏\n롱다운 2\n15%\n84,900원\n내일도착", alt: "롱다운 2" },
+      { attrs: { "data-item-id": "3", "data-price": "84900", "data-original-price": "99900" },
+        text: "1\n롱다운 3\n15%\n84,900원", alt: "롱다운 3" },
+      { attrs: { "data-item-id": "4", "data-price": "84900", "data-original-price": "99900" },
+        text: "내일도착\n롱다운 4\n84,900원", alt: "롱다운 4" },
+      { attrs: { "data-item-id": "5", "data-price": "84900", "data-original-price": "99900" },
+        text: "Storm Shield Parka Black\n84,900원", alt: "Storm Shield Parka Black" },
+    ];
+    expect(brands(run(cards, "www.musinsa.com", { tree: true, pathname: "/like/goods" }))).toEqual([
+      ["1", "다이나핏", "BLACKLIGHT 롱다운"],
+      ["2", "다이나핏", "롱다운 2"],
+      ["3", "", "롱다운 3"],
+      ["4", "", "롱다운 4"],
+      ["5", "", "Storm Shield Parka Black"],
     ]);
   });
 });
