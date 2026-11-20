@@ -1,4 +1,4 @@
-# PR 과 main 에 올라온 코드를 자동으로 검사한다: lint → 타입 검사 → 테스트 → build
+# PR 과 main 에 올라온 코드를 자동으로 검사한다: lint → 타입 검사 → 테스트 → DB 검증 → build
 # 비밀 값(Supabase 키 등)은 사용하지 않는다. build 는 요청 시점에만 DB 에 접속하므로 키 없이 통과한다.
 name: CI
 
@@ -38,6 +38,10 @@ jobs:
 
       - name: Test
         run: npm test
+
+      # 마이그레이션 + 시드를 PGlite 에 적용해 제약조건·트리거·RLS·권한·DB 함수를 검증
+      - name: DB checks
+        run: npm run test:db
 
       - name: Build
         run: npm run build
