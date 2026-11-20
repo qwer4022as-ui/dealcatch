@@ -55,7 +55,7 @@ npx supabase db advisors --remote                    # 보안·성능 점검
 
 ## CI (GitHub Actions)
 
-PR 을 올리거나 main 에 merge 되면 [.github/workflows/ci.yml](.github/workflows/ci.yml) 이 lint → 타입 검사 → 테스트 → build 를 실행한다. PR 화면의 Checks 에서 결과를 확인하고, 실패하면 merge 하지 않는다. 비밀 값은 쓰지 않는다.
+PR 을 올리거나 main 에 merge 되면 [.github/workflows/ci.yml](.github/workflows/ci.yml) 이 lint → 타입 검사 → 테스트 → DB 검증 → build 를 실행한다. PR 화면의 Checks 에서 결과를 확인하고, 실패하면 merge 하지 않는다. 비밀 값은 쓰지 않는다.
 
 ## 스크립트
 
@@ -66,3 +66,4 @@ PR 을 올리거나 main 에 merge 되면 [.github/workflows/ci.yml](.github/wor
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript 타입 검사 |
 | `npm test` | Vitest 1회 실행 (`npm run test:watch`는 감시 모드) |
+| `npm run test:db` | DB 검증: 마이그레이션·시드를 PGlite 에 적용해 제약조건·트리거·권한·함수 확인 (Docker 불필요) |
