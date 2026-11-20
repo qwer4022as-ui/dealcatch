@@ -93,6 +93,13 @@ function BatchForm({ items, matches }: Loaded) {
         페이지에서 상품 {items.length}개를 읽었고, 그중 등록된 판매처 {matched.length}개를 찾았습니다.
       </p>
 
+      {matched.length === 0 && (
+        <div role="status" className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+          ◐ 이 페이지에는 등록한 상품이 없습니다. 추적 중인 상품이 보이는 <strong>좋아요 목록</strong>이나{" "}
+          <strong>브랜드 페이지</strong>에서, 등록한 상품이 화면에 보이는 상태로 북마클릿을 눌러 주세요.
+        </div>
+      )}
+
       {matched.length > 0 && (
         <form key={JSON.stringify(state.values)} action={formAction} className="flex flex-col gap-4">
           {state.errors.length > 0 && (
