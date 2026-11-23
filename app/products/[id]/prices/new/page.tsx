@@ -9,7 +9,7 @@ import { PriceForm } from "./PriceForm";
 
 export default function NewPricePage(props: PageProps<"/products/[id]/prices/new">) {
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 py-8">
       <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
         <NewPriceBody {...props} />
       </Suspense>

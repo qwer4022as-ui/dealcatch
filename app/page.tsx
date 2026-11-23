@@ -6,6 +6,7 @@ import { AlertList } from "@/components/AlertList";
 import { CheckList } from "@/components/CheckList";
 import { ProductTable } from "@/components/ProductTable";
 import { SampleBanner } from "@/components/SampleBanner";
+import { Mascot } from "@/components/Mascot";
 import { formatAgo } from "@/lib/format";
 import { healthBadge } from "@/lib/pricing/labels";
 import { NEAR_LOW_PCT, isNearLow } from "@/lib/pricing/summary";
@@ -17,8 +18,20 @@ import { listCheckTargets, listProducts } from "@/lib/repositories/product-list"
 
 export default function DashboardPage() {
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8">
-      <h1 className="text-2xl font-semibold">대시보드</h1>
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8">
+      <section className="relative grid items-center gap-6 overflow-hidden md:grid-cols-[1fr_minmax(0,460px)]">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+            의류 <span className="text-accent">가격 추적</span> 대시보드
+          </h1>
+          <p className="text-sm leading-relaxed text-zinc-400 sm:text-base">
+            등록한 옷의 가격 변화를 한눈에 확인하고,
+            <br />
+            수집 기간 최저가를 놓치지 마세요.
+          </p>
+        </div>
+        <Mascot className="w-full max-w-[460px] justify-self-end" />
+      </section>
       <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
         <Dashboard />
       </Suspense>
@@ -28,9 +41,9 @@ export default function DashboardPage() {
 
 function Tile({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
-    <div className="flex flex-col gap-1 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="card flex flex-col gap-1 p-4">
       <div className="text-xs text-zinc-500 dark:text-zinc-400">{label}</div>
-      <div className="text-2xl font-semibold tabular-nums">{value}</div>
+      <div className="text-2xl font-bold tabular-nums text-zinc-50">{value}</div>
       {note && <div className="text-xs text-zinc-600 dark:text-zinc-400">{note}</div>}
     </div>
   );
@@ -85,8 +98,8 @@ async function Dashboard() {
         <Tile label="마지막 수집 시도" value={lastAttempt ? formatAgo(lastAttempt, now) : "—"} />
       </section>
 
-      <section aria-label="최저가 근접 상품" className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold">수집 기간 최저가 근접 상품</h2>
+      <section aria-label="최저가 근접 상품" className="card flex flex-col gap-2 p-5">
+        <h2 className="text-lg font-bold">수집 기간 최저가 근접 상품</h2>
         {nearLow.length === 0 ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             현재가가 수집 기간 최저가의 +{NEAR_LOW_PCT}% 이내인 상품이 없습니다.
@@ -96,8 +109,8 @@ async function Dashboard() {
         )}
       </section>
 
-      <section aria-label="주의 필요" className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold">주의 필요</h2>
+      <section aria-label="주의 필요" className="card flex flex-col gap-2 p-5">
+        <h2 className="text-lg font-bold">주의 필요</h2>
         {attention.length === 0 ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">수집 실패나 오래된 데이터가 없습니다.</p>
         ) : (
@@ -114,7 +127,7 @@ async function Dashboard() {
         )}
       </section>
 
-      <Link href="/products" className="text-sm underline underline-offset-2">
+      <Link href="/products" className="self-start rounded-full px-4 py-2 text-sm text-accent ring-1 ring-inset ring-accent/40 hover:bg-accent/10">
         전체 상품 보기 →
       </Link>
     </>

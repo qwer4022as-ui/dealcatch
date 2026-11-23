@@ -7,7 +7,7 @@ import { listProducts } from "@/lib/repositories/product-list";
 
 export default function ProductsPage(props: PageProps<"/products">) {
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8">
       <h1 className="text-2xl font-semibold">상품</h1>
       <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
         <ProductList {...props} />
