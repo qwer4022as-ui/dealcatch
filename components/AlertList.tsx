@@ -16,11 +16,11 @@ function Row({ href, tag, tagClass, name, label, price, meta }: {
   return (
     <li>
       <Link href={href} className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl px-3 py-2 hover:bg-zinc-800/60">
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${tagClass}`}>{tag}</span>
+        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${tagClass}`}>{tag}</span>
         <span className="min-w-0 flex-1 truncate font-medium text-zinc-100">{name}</span>
         <span className="text-xs text-zinc-400">{label}</span>
-        <span className="text-lg font-bold tabular-nums text-accent">{formatKRW(price)}</span>
-        <span className="text-xs tabular-nums text-zinc-400">{meta}</span>
+        <span className="whitespace-nowrap text-lg font-bold tabular-nums text-accent">{formatKRW(price)}</span>
+        <span className="whitespace-nowrap text-xs tabular-nums text-zinc-400">{meta}</span>
         <Chevron />
       </Link>
     </li>

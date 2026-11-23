@@ -11,15 +11,15 @@ function priceRange(s: ProductSummary): string {
   return s.currentMin === s.currentMax ? formatKRW(s.currentMin) : `${formatKRW(s.currentMin)}~`;
 }
 
-const th = "py-3 pr-4 font-medium";
+const th = "whitespace-nowrap py-3 pr-4 font-medium";
 
 export function ProductTable({ items, now }: { items: ProductListItem[]; now: Date }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950/60">
-      <table className="w-full min-w-[960px] text-sm">
+      <table className="w-full min-w-[1080px] text-sm">
         <thead className="text-left text-xs text-zinc-400">
           <tr className="border-b border-zinc-800">
-            <th className={`${th} pl-5`}>상품</th>
+            <th className={`${th} w-[34%] pl-5`}>상품</th>
             <th className={`${th} text-right`}>옵션</th>
             <th className={`${th} text-right`}>현재가</th>
             <th className={`${th} text-right`}>수집 기간 최저가</th>
@@ -49,14 +49,14 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
                     </div>
                   </div>
                 </td>
-                <td className="py-3 pr-4 text-right tabular-nums text-zinc-200">{s.variantCount}개</td>
-                <td className="py-3 pr-4 text-right text-base font-bold tabular-nums text-zinc-50">
+                <td className="whitespace-nowrap py-3 pr-4 text-right tabular-nums text-zinc-200">{s.variantCount}개</td>
+                <td className="whitespace-nowrap py-3 pr-4 text-right text-base font-bold tabular-nums text-zinc-50">
                   {priceRange(s)}
                   {stale && s.lastSuccessAt && (
                     <div className="text-xs font-normal text-zinc-400">{formatAgo(s.lastSuccessAt, now)} 기준</div>
                   )}
                 </td>
-                <td className="py-3 pr-4 text-right tabular-nums">
+                <td className="whitespace-nowrap py-3 pr-4 text-right tabular-nums">
                   {s.periodLow ? (
                     <>
                       <div className="font-semibold text-zinc-100">{formatKRW(s.periodLow.price)}</div>
@@ -66,28 +66,31 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
                     "—"
                   )}
                 </td>
-                <td className="py-3 pr-4 text-xs">
+                <td className="min-w-48 py-3 pr-4 text-xs">
                   {s.nearest && s.nearestLowPct !== null ? (
                     <>
-                      <div className={s.nearestLowPct === 0 ? "font-semibold text-accent" : "font-semibold text-zinc-100"}>
+                      <div className={`whitespace-nowrap font-semibold ${s.nearestLowPct === 0 ? "text-accent" : "text-zinc-100"}`}>
                         {s.nearestLowPct === 0 ? "최저가와 동일" : `최저가 ${formatSignedPct(s.nearestLowPct)}`}
                       </div>
                       <div className="text-zinc-400">
-                        {s.nearest.label} ({formatKRW(s.nearest.current)}
-                        {s.nearestLowPct !== 0 && ` / 최저 ${formatKRW(s.nearest.low)}`})
+                        {s.nearest.label}{" "}
+                        <span className="whitespace-nowrap">
+                          ({formatKRW(s.nearest.current)}
+                          {s.nearestLowPct !== 0 && ` / 최저 ${formatKRW(s.nearest.low)}`})
+                        </span>
                       </div>
                     </>
                   ) : (
                     <span className="text-zinc-500">—</span>
                   )}
                 </td>
-                <td className="py-3 pr-4">
-                  <div className="flex flex-wrap gap-1">
+                <td className="whitespace-nowrap py-3 pr-4">
+                  <div className="flex flex-col items-start gap-1">
                     <Badge label={healthBadge(s, now)} />
                     {s.hasSample && <Badge label={{ text: "샘플", tone: "sample" }} />}
                   </div>
                 </td>
-                <td className="py-3 pr-5 text-right">
+                <td className="whitespace-nowrap py-3 pr-5 text-right">
                   <Link
                     href={`/products/${p.id}`}
                     aria-label={`${p.brandName} ${p.name} 상세보기`}

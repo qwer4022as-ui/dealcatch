@@ -60,14 +60,14 @@ export function CheckList({ data, now }: { data: CheckListData; now: Date }) {
                 <Link href={`/products/${t.productId}`} className="min-w-0 flex-1 font-medium text-zinc-100 underline-offset-2 hover:underline">
                   {t.brandName} {t.productName}
                 </Link>
-                <span className="w-32 text-xs text-zinc-400">
+                <span className="w-36 text-xs text-zinc-400">
                   {t.platformName}
                   {t.color && ` · ${t.color}`}
                 </span>
-                <span className="w-28 text-right text-xs tabular-nums text-zinc-400">
+                <span className="w-32 whitespace-nowrap text-right text-xs tabular-nums text-zinc-400">
                   {t.lastSuccessAt ? `마지막 기록 ${formatAgo(t.lastSuccessAt, now)}` : "기록 없음"}
                 </span>
-                <div className="flex gap-2">
+                <div className="flex gap-2 whitespace-nowrap">
                   <a
                     href={t.url}
                     target="_blank"
