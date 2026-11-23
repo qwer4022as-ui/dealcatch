@@ -39,6 +39,8 @@ function Row({ href, tag, tagClass, name, label, price, meta }: {
 
 /** 대시보드 알림 (관리자 전용) */
 const ALERT_SHOW = 3;
+/** "더 보기"를 누를 때마다 늘어나는 개수 */
+const ALERT_STEP = 20;
 
 export function AlertList({ targetHits, newLows, now }: { targetHits: TargetHit[]; newLows: NewLow[]; now: Date }) {
   const total = targetHits.length + newLows.length;
@@ -66,6 +68,7 @@ export function AlertList({ targetHits, newLows, now }: { targetHits: TargetHit[
       ) : (
         <ShowMore
           initial={ALERT_SHOW}
+          step={ALERT_STEP}
           items={[
             ...targetHits.map((h) => (
               <Row
