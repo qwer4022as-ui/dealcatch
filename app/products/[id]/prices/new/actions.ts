@@ -15,7 +15,7 @@ export interface PriceFormState {
 }
 
 export async function recordPricesAction(
-  ctx: { productId: number; listingId: number },
+  ctx: { productId: number; listingId: number; returnToDashboard?: boolean },
   _prev: PriceFormState,
   fd: FormData,
 ): Promise<PriceFormState> {
@@ -62,5 +62,6 @@ export async function recordPricesAction(
     return { errors: [message], bigChanges: [], values };
   }
 
+  if (ctx.returnToDashboard) redirect(`/?recorded=${ctx.listingId}#check`);
   redirect(`/products/${ctx.productId}?variant=${result.items[0].listing_variant_id}`);
 }

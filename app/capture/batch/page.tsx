@@ -4,7 +4,7 @@ import { BatchClient } from "./BatchClient";
 
 export default function BatchCapturePage(props: PageProps<"/capture/batch">) {
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 px-4 py-8">
       <h1 className="text-2xl font-semibold">무신사 일괄 기록</h1>
       <Suspense fallback={<BatchClient />}>
         <SavedNotice {...props} />

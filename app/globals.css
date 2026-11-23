@@ -1,37 +1,88 @@
 @import "tailwindcss";
 
+/* 항상 다크 테마: <html class="dark"> 에서 기존 dark: 클래스가 적용된다 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  /* 차트 토큰 (dataviz 기본 팔레트) */
-  --chart-surface: #fcfcfb;
-  --chart-sale: #2a78d6;
-  --chart-list: #8a8984;
-  --chart-grid: #e7e6e2;
-  --chart-text: #52514e;
-  --chart-soldout: #52514e;
+  --background: #0b0a10;
+  --foreground: #ecebf3;
+  --accent: #b9a4ff;
+  --accent-strong: #9d84ff;
+  /* 차트 토큰 (다크) */
+  --chart-surface: #14121c;
+  --chart-sale: #b9a4ff;
+  --chart-list: #8f8ca0;
+  --chart-grid: #2a2738;
+  --chart-text: #c4c1d4;
+  --chart-soldout: #c4c1d4;
+  color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-}
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --chart-surface: #1a1a19;
-    --chart-sale: #3987e5;
-    --chart-list: #8f8e88;
-    --chart-grid: #2e2e2c;
-    --chart-text: #c3c2b7;
-    --chart-soldout: #c3c2b7;
-  }
+  /* zinc 을 보라빛이 도는 블랙 계열로 교체 (기존 화면 전체에 적용) */
+  --color-zinc-50: #f6f5fa;
+  --color-zinc-100: #ecebf3;
+  --color-zinc-200: #d9d6e5;
+  --color-zinc-300: #bdb9cf;
+  --color-zinc-400: #b1adc4;
+  --color-zinc-500: #8d89a3;
+  --color-zinc-600: #5f5b75;
+  --color-zinc-700: #36324a;
+  --color-zinc-800: #26233a;
+  --color-zinc-900: #17151f;
+  --color-zinc-950: #0e0d14;
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1200px 500px at 70% -10%, rgb(124 92 255 / 0.12), transparent 60%),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
-  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  font-family: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+/* 공용 카드 */
+.card {
+  border-radius: 1rem;
+  border: 1px solid var(--color-zinc-800);
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.025), rgb(255 255 255 / 0.01));
+}
+
+/* ── 대시보드 상단 애니메이션 ── */
+@keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7%); } }
+@keyframes hero-swing { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes hero-burst { 0%, 100% { transform: scale(0.85); opacity: 0.6; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes hero-twinkle { 0%, 100% { transform: scale(0.4); opacity: 0.15; } 50% { transform: scale(1); opacity: 0.9; } }
+@keyframes hero-glow { 0%, 100% { opacity: 0.45; transform: scale(0.95); } 50% { opacity: 0.85; transform: scale(1.05); } }
+@keyframes hero-fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes hero-shine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.hero-float { animation: hero-float 4s ease-in-out infinite; }
+.hero-swing { animation: hero-swing 3.2s ease-in-out infinite; transform-origin: 50% 8%; }
+.hero-burst { animation: hero-burst 1.6s ease-in-out infinite; transform-origin: 100% 60%; }
+.hero-twinkle { animation: hero-twinkle 3s ease-in-out infinite; }
+.hero-glow { animation: hero-glow 5s ease-in-out infinite; }
+.hero-fade { animation: hero-fade 0.7s ease-out both; }
+.hero-fade-2 { animation: hero-fade 0.7s ease-out 0.15s both; }
+.hero-shine {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 40%, #f1ecff 50%, var(--accent) 60%, var(--accent) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hero-shine 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float, .hero-swing, .hero-burst, .hero-twinkle, .hero-glow, .hero-fade, .hero-fade-2, .hero-shine {
+    animation: none;
+  }
 }

@@ -11,7 +11,7 @@ export default function ProductError({ error, retry }: { error: unknown; retry: 
     process.env.NODE_ENV === "development" && error instanceof Error ? error.message : null;
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-3 px-4 py-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-3 px-4 py-8">
       <h1 className="text-xl font-semibold">가격 정보를 불러오지 못했습니다</h1>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
         데이터베이스 연결이나 환경변수 설정을 확인해 주세요.

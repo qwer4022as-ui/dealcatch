@@ -7,17 +7,17 @@ import { healthBadge } from "@/lib/pricing/labels";
 export function ListingCompare({ rows, now }: { rows: ComparedRow[]; now: Date }) {
   if (rows.length < 2) return null;
   return (
-    <section aria-label="판매처별 가격 비교" className="flex flex-col gap-2">
-      <h2 className="text-base font-semibold">판매처·색상별 가격 비교</h2>
+    <section aria-label="판매처별 가격 비교" className="card flex flex-col gap-2 p-5">
+      <h2 className="text-lg font-bold">판매처·색상별 가격 비교</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-zinc-500 dark:text-zinc-400">
             <tr className="border-b border-zinc-200 dark:border-zinc-800">
-              <th className="py-2 pr-4 font-medium">판매처</th>
-              <th className="py-2 pr-4 text-right font-medium">현재가</th>
-              <th className="py-2 pr-4 text-right font-medium">수집 기간 최저가</th>
-              <th className="py-2 pr-4 font-medium">마지막 기록</th>
-              <th className="py-2 font-medium">상태</th>
+              <th className="whitespace-nowrap py-2 pr-4 font-medium">판매처</th>
+              <th className="whitespace-nowrap py-2 pr-4 text-right font-medium">현재가</th>
+              <th className="whitespace-nowrap py-2 pr-4 text-right font-medium">수집 기간 최저가</th>
+              <th className="whitespace-nowrap py-2 pr-4 font-medium">마지막 기록</th>
+              <th className="whitespace-nowrap py-2 font-medium">상태</th>
             </tr>
           </thead>
           <tbody>
@@ -36,13 +36,13 @@ export function ListingCompare({ rows, now }: { rows: ComparedRow[]; now: Date }
                       {r.label} ↗
                     </a>
                   </td>
-                  <td className="py-2 pr-4 text-right tabular-nums">
+                  <td className="whitespace-nowrap py-2 pr-4 text-right tabular-nums">
                     {price}
                     {r.cheapest && (
-                      <div className="text-xs font-medium text-emerald-800 dark:text-emerald-300">● 가장 저렴</div>
+                      <div className="text-xs font-medium text-emerald-300">● 가장 저렴</div>
                     )}
                   </td>
-                  <td className="py-2 pr-4 text-right tabular-nums">
+                  <td className="whitespace-nowrap py-2 pr-4 text-right tabular-nums">
                     {s.periodLow ? (
                       <>
                         {formatKRW(s.periodLow.price)}
@@ -53,7 +53,7 @@ export function ListingCompare({ rows, now }: { rows: ComparedRow[]; now: Date }
                       "—"
                     )}
                   </td>
-                  <td className="py-2 pr-4 text-xs text-zinc-600 dark:text-zinc-400">
+                  <td className="whitespace-nowrap py-2 pr-4 text-xs text-zinc-400">
                     {s.lastSuccessAt ? formatAgo(s.lastSuccessAt, now) : "기록 없음"}
                   </td>
                   <td className="py-2">

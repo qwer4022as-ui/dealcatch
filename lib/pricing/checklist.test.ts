@@ -7,9 +7,11 @@ const t = (listingId: number, lastSuccessAt: string | null): CheckTarget => ({
   productId: 1,
   brandName: "B",
   productName: "P",
+  modelNo: null,
   platformName: "무신사",
   color: "Black",
   url: `https://www.musinsa.com/products/${listingId}`,
+  variantCount: 1,
   lastSuccessAt: lastSuccessAt ? new Date(lastSuccessAt) : null,
 });
 
