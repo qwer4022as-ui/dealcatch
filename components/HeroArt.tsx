@@ -20,9 +20,9 @@ const SPARKLES = [
 ] as const;
 
 /** 대시보드 상단 그림. 말풍선·₩ 태그·강조선은 따로 움직이는 레이어다 (장식용) */
-export function HeroArt() {
+export function HeroArt({ className = "max-w-[760px]" }: { className?: string }) {
   return (
-    <div className="hero-fade relative w-full max-w-[760px] justify-self-end [mask-image:linear-gradient(to_right,transparent,black_3%,black_94%,transparent)]">
+    <div className={`hero-fade relative w-full justify-self-end ${className} [mask-image:linear-gradient(to_right,transparent,black_3%,black_94%,transparent)]`}>
       <div aria-hidden className="hero-glow absolute left-[30%] top-[10%] h-[80%] w-[35%] rounded-full bg-accent/25 blur-3xl" />
       <Image
         src={base}
