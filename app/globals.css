@@ -53,3 +53,34 @@ body {
   border: 1px solid var(--color-zinc-800);
   background: linear-gradient(180deg, rgb(255 255 255 / 0.025), rgb(255 255 255 / 0.01));
 }
+
+/* ── 대시보드 상단 애니메이션 ── */
+@keyframes hero-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7%); } }
+@keyframes hero-swing { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes hero-burst { 0%, 100% { transform: scale(0.85); opacity: 0.6; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes hero-twinkle { 0%, 100% { transform: scale(0.4); opacity: 0.15; } 50% { transform: scale(1); opacity: 0.9; } }
+@keyframes hero-glow { 0%, 100% { opacity: 0.45; transform: scale(0.95); } 50% { opacity: 0.85; transform: scale(1.05); } }
+@keyframes hero-fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes hero-shine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.hero-float { animation: hero-float 4s ease-in-out infinite; }
+.hero-swing { animation: hero-swing 3.2s ease-in-out infinite; transform-origin: 50% 8%; }
+.hero-burst { animation: hero-burst 1.6s ease-in-out infinite; transform-origin: 100% 60%; }
+.hero-twinkle { animation: hero-twinkle 3s ease-in-out infinite; }
+.hero-glow { animation: hero-glow 5s ease-in-out infinite; }
+.hero-fade { animation: hero-fade 0.7s ease-out both; }
+.hero-fade-2 { animation: hero-fade 0.7s ease-out 0.15s both; }
+.hero-shine {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 40%, #f1ecff 50%, var(--accent) 60%, var(--accent) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hero-shine 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float, .hero-swing, .hero-burst, .hero-twinkle, .hero-glow, .hero-fade, .hero-fade-2, .hero-shine {
+    animation: none;
+  }
+}

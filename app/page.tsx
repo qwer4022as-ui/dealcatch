@@ -1,9 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import heroMascot from "@/public/hero-mascot.png";
 import { Badge } from "@/components/Badge";
+import { HeroArt } from "@/components/HeroArt";
 import { AlertList } from "@/components/AlertList";
 import { CheckList } from "@/components/CheckList";
 import { ProductTable } from "@/components/ProductTable";
@@ -20,23 +19,18 @@ import { listCheckTargets, listProducts } from "@/lib/repositories/product-list"
 export default function DashboardPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8">
-      <section className="relative grid items-center gap-6 overflow-hidden md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+      <section className="relative grid items-center gap-6 overflow-hidden md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            의류 <span className="text-accent">가격 추적</span> 대시보드
+          <h1 className="hero-fade text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl lg:leading-tight">
+            의류 <span className="hero-shine">가격 추적</span> 대시보드
           </h1>
-          <p className="text-sm leading-relaxed text-zinc-400 sm:text-base">
+          <p className="hero-fade-2 text-sm leading-relaxed text-zinc-400 sm:text-base">
             등록한 옷의 가격 변화를 한눈에 확인하고,
             <br />
             수집 기간 최저가를 놓치지 마세요.
           </p>
         </div>
-        <Image
-          src={heroMascot}
-          alt="옷걸이 비니를 쓰고 노트북으로 옷 가격을 확인하는 캐릭터"
-          priority
-          className="h-auto w-full max-w-[680px] justify-self-end [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
-        />
+        <HeroArt />
       </section>
       <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
         <Dashboard />
