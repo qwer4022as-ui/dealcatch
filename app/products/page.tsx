@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense, type ReactNode } from "react";
-import { HeroArt } from "@/components/HeroArt";
 import { ProductTable } from "@/components/ProductTable";
 import { SampleBanner } from "@/components/SampleBanner";
 import { StatCard, StatIcons } from "@/components/StatCard";
@@ -20,14 +19,13 @@ import { listProducts } from "@/lib/repositories/product-list";
 export default function ProductsPage(props: PageProps<"/products">) {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8">
-      <section className="grid items-center gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <section>
         <div className="flex flex-col gap-2">
           <h1 className="hero-fade text-3xl font-extrabold tracking-tight sm:text-4xl">상품</h1>
           <p className="hero-fade-2 text-sm leading-relaxed text-zinc-400 sm:text-base">
             가격을 추적 중인 의류 상품을 검색하고, 가격 변동과 최저가 옵션을 한눈에 비교하세요.
           </p>
         </div>
-        <HeroArt className="max-w-[560px]" />
       </section>
       <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
         <ProductList {...props} />

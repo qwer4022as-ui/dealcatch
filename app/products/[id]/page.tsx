@@ -4,7 +4,6 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
 import { GarmentIcon } from "@/components/GarmentIcon";
-import { HeroArt } from "@/components/HeroArt";
 import { ListingCompare } from "@/components/ListingCompare";
 import { NarrativeCard } from "@/components/NarrativeCard";
 import { TargetPriceForm } from "@/components/TargetPriceForm";
@@ -70,7 +69,7 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
     <>
       {product.isSample && <SampleBanner />}
 
-      <header className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
+      <header>
         <div className="hero-fade flex items-center gap-5">
           <GarmentIcon size="lg" name={`${product.category ?? ""} ${product.name}`} color={selected?.optionLabel ?? ""} />
           <div className="flex min-w-0 flex-col gap-2">
@@ -104,7 +103,6 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
             </div>
           </div>
         </div>
-        <HeroArt className="hidden max-w-[520px] lg:block" />
       </header>
 
       {product.variants.length > 0 && (

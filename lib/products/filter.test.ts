@@ -81,7 +81,7 @@ describe("listStats", () => {
       }),
       product(3),
     ];
-    expect(listStats(items, NOW)).toEqual({ total: 3, atLow: 1, recentNewLow: 1, needsUpdate: 2 });
+    expect(listStats(items, NOW)).toEqual({ total: 3, atLow: 1, recentNewLow: 1, newLowToday: 0, needsUpdate: 2 });
   });
 });
 

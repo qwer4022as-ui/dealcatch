@@ -8,10 +8,13 @@ export interface CheckTarget {
   productId: number;
   brandName: string;
   productName: string;
+  modelNo: string | null;
   platformName: string;
   /** 판매처 옵션의 색상 (없으면 빈 문자열) */
   color: string;
   url: string;
+  /** 판매처의 옵션(사이즈 등) 수 */
+  variantCount: number;
   lastSuccessAt: Date | null;
 }
 

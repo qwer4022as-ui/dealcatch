@@ -28,6 +28,7 @@ export function PriceForm({
   variants,
   defaultCollectedAt,
   listingUrl,
+  returnToDashboard = false,
 }: {
   productId: number;
   listingId: number;
@@ -35,8 +36,10 @@ export function PriceForm({
   listingUrl: string;
   variants: PriceFormVariant[];
   defaultCollectedAt: string;
+  /** 대시보드 "오늘 확인할 상품"에서 왔으면 저장 후 대시보드로 돌아간다 */
+  returnToDashboard?: boolean;
 }) {
-  const action = recordPricesAction.bind(null, { productId, listingId });
+  const action = recordPricesAction.bind(null, { productId, listingId, returnToDashboard });
   const [state, formAction, pending] = useActionState<PriceFormState, FormData>(action, {
     errors: [],
     bigChanges: [],

@@ -20,7 +20,7 @@ export default function NewPricePage(props: PageProps<"/products/[id]/prices/new
 async function NewPriceBody({ params, searchParams }: PageProps<"/products/[id]/prices/new">) {
   await connection();
   const { id } = await params;
-  const { listing, registered } = await searchParams;
+  const { listing, registered, from } = await searchParams;
   await requireAdmin(`/products/${id}/prices/new`);
 
   const productId = Number(id);
@@ -94,6 +94,7 @@ async function NewPriceBody({ params, searchParams }: PageProps<"/products/[id]/
         }))}
         defaultCollectedAt={toKstLocal(new Date())}
         listingUrl={current.url}
+        returnToDashboard={(Array.isArray(from) ? from[0] : from) === "dashboard"}
       />
     </>
   );

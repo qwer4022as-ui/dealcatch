@@ -1,6 +1,7 @@
 // 상품 목록 화면의 필터·정렬·요약 숫자 (순수 함수). 수집한 값만 쓰며 새 값을 만들지 않는다.
 
 import { recentNewLow, type AlertVariant } from "@/lib/pricing/alerts";
+import { kstDateKey } from "@/lib/pricing/kst";
 import { isNearLow, type ProductSummary } from "@/lib/pricing/summary";
 
 export interface FilterableProduct {
@@ -67,17 +68,22 @@ export interface ListStats {
   atLow: number;
   /** 최근 NEW_LOW_DAYS 일 안에 수집 기간 최저가를 갱신한 상품 */
   recentNewLow: number;
+  /** 그중 오늘(KST) 갱신한 상품 */
+  newLowToday: number;
   /** 오래된 데이터 또는 수집 실패 */
   needsUpdate: number;
 }
 
 export function listStats(items: readonly FilterableProduct[], now: Date): ListStats {
+  const lows = items
+    .map((p) => recentNewLow({ productId: p.id, name: p.name, isSample: p.isSample, targetPrice: null, variants: p.alertVariants }, now))
+    .filter((n) => n !== null);
+  const today = kstDateKey(now);
   return {
     total: items.length,
     atLow: items.filter((p) => p.summary.nearestLowPct === 0).length,
-    recentNewLow: items.filter(
-      (p) => recentNewLow({ productId: p.id, name: p.name, isSample: p.isSample, targetPrice: null, variants: p.alertVariants }, now) !== null,
-    ).length,
+    recentNewLow: lows.length,
+    newLowToday: lows.filter((n) => kstDateKey(n.at) === today).length,
     needsUpdate: items.filter((p) => p.summary.health === "stale" || p.summary.health === "failing").length,
   };
 }
