@@ -108,18 +108,23 @@ export function PriceForm({
         <table className="w-full text-sm">
           <thead className="text-left text-xs text-zinc-500 dark:text-zinc-400">
             <tr className="border-b border-zinc-200 dark:border-zinc-800">
-              <th className="py-2 pr-3 font-medium">옵션</th>
-              <th className="py-2 pr-3 font-medium">직전 판매가</th>
-              <th className="py-2 pr-3 font-medium">정가</th>
-              <th className="py-2 pr-3 font-medium">판매가</th>
-              <th className="py-2 font-medium">재고</th>
+              <th className="whitespace-nowrap py-2 pr-3 font-medium">옵션</th>
+              <th className="hidden whitespace-nowrap py-2 pr-3 font-medium sm:table-cell">직전 판매가</th>
+              <th className="whitespace-nowrap py-2 pr-3 font-medium">정가</th>
+              <th className="whitespace-nowrap py-2 pr-3 font-medium">판매가</th>
+              <th className="whitespace-nowrap py-2 font-medium">재고</th>
             </tr>
           </thead>
           <tbody>
             {variants.map((v) => (
               <tr key={v.listingVariantId} className="border-b border-zinc-100 dark:border-zinc-900">
-                <td className="py-2 pr-3">{v.optionLabel}</td>
-                <td className="py-2 pr-3 tabular-nums text-zinc-600 dark:text-zinc-400">
+                <td className="py-2 pr-3">
+                  <span className="whitespace-nowrap">{v.optionLabel}</span>
+                  <div className="whitespace-nowrap text-xs tabular-nums text-zinc-400 sm:hidden">
+                    직전 {v.latestPrice !== null ? formatKRW(v.latestPrice) : "—"}
+                  </div>
+                </td>
+                <td className="hidden whitespace-nowrap py-2 pr-3 tabular-nums text-zinc-600 sm:table-cell dark:text-zinc-400">
                   {v.latestPrice !== null ? formatKRW(v.latestPrice) : "—"}
                 </td>
                 <td className="py-2 pr-3">
@@ -145,7 +150,7 @@ export function PriceForm({
                     name={`stock_${v.listingVariantId}`}
                     aria-label={`${v.optionLabel} 재고`}
                     defaultValue={val(`stock_${v.listingVariantId}`, "in_stock")}
-                    className={inputClass}
+                    className={`${inputClass} min-w-[5.5rem]`}
                   >
                     {STOCK_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>

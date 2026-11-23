@@ -220,7 +220,7 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
               <tr>
                 <th className="w-full whitespace-nowrap px-4 py-3 font-medium">상품 정보</th>
                 <th className="hidden whitespace-nowrap px-3 py-3 text-right font-medium xl:table-cell">옵션</th>
-                <th className="whitespace-nowrap px-3 py-3 text-right font-medium">현재가</th>
+                <th className="hidden whitespace-nowrap px-3 py-3 text-right font-medium sm:table-cell">현재가</th>
                 <th className="hidden whitespace-nowrap px-3 py-3 text-center font-medium sm:table-cell">변동률 (7일)</th>
                 <th className="hidden whitespace-nowrap px-3 py-3 font-medium lg:table-cell">가격 추이 (30일)</th>
                 <th className="hidden whitespace-nowrap px-3 py-3 text-center font-medium xl:table-cell">마지막 기록</th>
@@ -238,25 +238,31 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
                     key={r.listingId}
                     className={`transition-colors hover:bg-zinc-800/30 ${r.listingId === recordedId ? "bg-emerald-500/[0.06]" : ""}`}
                   >
-                    <td className="w-full min-w-40 max-w-0 px-4 py-2.5">
+                    <td className="w-full min-w-40 max-w-0 px-3 py-2.5 sm:px-4">
                       <div className="flex items-center gap-3">
-                        <GarmentIcon name={r.productName} color={r.color} />
+                        <span className="hidden sm:block">
+                          <GarmentIcon name={r.productName} color={r.color} />
+                        </span>
                         <div className="min-w-0">
                           <Link
                             href={`/products/${r.productId}`}
                             title={`${r.brandName} ${r.productName}`}
-                            className="block truncate font-semibold text-zinc-50 underline-offset-2 hover:underline"
+                            className="line-clamp-2 font-semibold leading-snug text-zinc-50 underline-offset-2 hover:underline"
                           >
                             {r.brandName} {r.productName}
                           </Link>
                           <div className="truncate text-xs text-zinc-400">
                             {[r.platformName, r.color, r.modelNo].filter(Boolean).join(" · ")}
                           </div>
+                          <div className="flex items-center gap-2 whitespace-nowrap text-xs sm:hidden">
+                            <span className="font-bold tabular-nums text-zinc-50">{r.current !== null ? formatKRW(r.current) : "—"}</span>
+                            <span className={r.recordedToday ? "text-emerald-300" : "text-amber-300"}>{r.recordedToday ? "✓ 기록 완료" : "● 미기록"}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="hidden whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-zinc-200 xl:table-cell">{r.variantCount}개</td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-right font-bold tabular-nums text-zinc-50">
+                    <td className="hidden whitespace-nowrap px-3 py-2.5 text-right font-bold tabular-nums text-zinc-50 sm:table-cell">
                       {r.current !== null ? formatKRW(r.current) : "—"}
                     </td>
                     <td className="hidden px-3 py-2.5 text-center sm:table-cell">

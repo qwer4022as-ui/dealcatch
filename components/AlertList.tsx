@@ -16,13 +16,22 @@ function Row({ href, tag, tagClass, name, label, price, meta }: {
 }) {
   return (
     <li>
-      <Link href={href} className="group flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl px-3 py-2 hover:bg-zinc-800/60">
-        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${tagClass}`}>{tag}</span>
-        <span className="min-w-0 flex-1 truncate font-medium text-zinc-100">{name}</span>
-        <span className="text-xs text-zinc-400">{label}</span>
-        <span className="whitespace-nowrap text-lg font-bold tabular-nums text-accent">{formatKRW(price)}</span>
-        <span className="whitespace-nowrap text-xs tabular-nums text-zinc-400">{meta}</span>
-        <Chevron />
+      <Link
+        href={href}
+        className="group flex flex-col gap-1 rounded-xl px-3 py-2 hover:bg-zinc-800/60 md:flex-row md:items-center md:gap-4"
+      >
+        <span className="flex min-w-0 flex-1 items-center gap-3">
+          <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${tagClass}`}>{tag}</span>
+          <span className="truncate font-medium text-zinc-100" title={name}>
+            {name}
+          </span>
+        </span>
+        <span className="flex items-center gap-3 pl-1 md:pl-0">
+          <span className="truncate text-xs text-zinc-400">{label}</span>
+          <span className="ml-auto whitespace-nowrap text-lg font-bold tabular-nums text-accent md:ml-0">{formatKRW(price)}</span>
+          <span className="whitespace-nowrap text-xs tabular-nums text-zinc-400">{meta}</span>
+          <Chevron />
+        </span>
       </Link>
     </li>
   );
@@ -37,8 +46,8 @@ export function AlertList({ targetHits, newLows, now }: { targetHits: TargetHit[
   return (
     <section
       aria-label="가격 알림"
-      className={`flex flex-col gap-2 rounded-2xl border border-accent/40 bg-accent/[0.06] p-4 shadow-[0_0_40px_-12px_rgb(185_164_255/0.35)] sm:flex-row ${
-        total > 1 ? "sm:items-start" : "sm:items-center"
+      className={`flex flex-col gap-2 rounded-2xl border border-accent/40 bg-accent/[0.06] p-4 shadow-[0_0_40px_-12px_rgb(185_164_255/0.35)] lg:flex-row ${
+        total > 1 ? "lg:items-start" : "lg:items-center"
       }`}
     >
       <h2 className="flex shrink-0 items-center gap-2 px-2 py-2 text-lg font-bold">

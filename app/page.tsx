@@ -116,13 +116,12 @@ async function Dashboard({ searchParams }: PageProps<"/">) {
         <StatCard icon={StatIcons.hanger} label="등록된 상품" value={items.length} aside={up(newThisWeek, "최근 7일")} />
         <StatCard
           icon={StatIcons.tag}
-          label="최저가 갱신"
+          label={`최저가 갱신 (${NEW_LOW_DAYS}일)`}
           value={stats.recentNewLow}
           aside={up(stats.newLowToday, "오늘")}
-          note={`최근 ${NEW_LOW_DAYS}일 수집 기간 최저가 갱신`}
         />
         <StatCard icon={StatIcons.check} label="오늘 기록 완료율" value={donePct} unit="%">
-          <div className="mt-1 flex items-center gap-3">
+          <div className="mt-1 flex items-center gap-2">
             <div
               className="h-2 flex-1 overflow-hidden rounded-full bg-zinc-800"
               role="progressbar"
@@ -140,12 +139,11 @@ async function Dashboard({ searchParams }: PageProps<"/">) {
         </StatCard>
         <StatCard
           icon={StatIcons.chart}
-          label={`평균 가격 변동률 (${CHANGE_DAYS}일)`}
+          label={`평균 변동률 (${CHANGE_DAYS}일)`}
           value={avgChange === null ? "—" : `${avgChange > 0 ? "+" : avgChange < 0 ? "−" : ""}${Math.abs(avgChange).toFixed(1)}`}
           unit={avgChange === null ? "" : "%"}
           valueClass={avgChange === null ? "text-zinc-400" : avgChange < 0 ? "text-emerald-400" : avgChange > 0 ? "text-red-400" : "text-zinc-50"}
-          aside={avgChange !== null && avgChange !== 0 && <span className={avgChange < 0 ? "text-emerald-400" : "text-red-400"}>{avgChange < 0 ? "↓" : "↑"}</span>}
-          note={avgChange === null ? `${CHANGE_DAYS}일 전 기록이 쌓이면 표시됩니다` : `${CHANGE_DAYS}일 전과 비교 가능한 판매처 평균`}
+          note={avgChange === null ? `${CHANGE_DAYS}일 전 기록 필요` : "비교 가능한 판매처 평균"}
         />
       </section>
 

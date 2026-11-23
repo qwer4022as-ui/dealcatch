@@ -42,11 +42,11 @@ export function GarmentIcon({ name, color = "", size = "md" }: { name: string; c
   return (
     <span
       className={`grid shrink-0 place-items-center bg-zinc-800/70 ring-1 ring-inset ring-zinc-700/60 ${
-        size === "lg" ? "h-32 w-32 rounded-3xl bg-gradient-to-br from-zinc-700/60 to-zinc-900" : "h-11 w-11 rounded-xl"
+        size === "lg" ? "h-20 w-20 rounded-2xl sm:h-32 sm:w-32 sm:rounded-3xl bg-gradient-to-br from-zinc-700/60 to-zinc-900" : "h-11 w-11 rounded-xl"
       }`}
       aria-hidden
     >
-      <svg viewBox="0 0 28 24" className={size === "lg" ? "h-20 w-20 drop-shadow-lg" : "h-7 w-7"}>
+      <svg viewBox="0 0 28 24" className={size === "lg" ? "h-12 w-12 drop-shadow-lg sm:h-20 sm:w-20" : "h-7 w-7"}>
         <path
           d={PATHS[kind]}
           fill={fill}
