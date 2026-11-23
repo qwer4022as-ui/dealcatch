@@ -215,16 +215,16 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
         <p className="py-8 text-center text-sm text-zinc-400">조건에 맞는 상품이 없습니다.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-800">
-          <table className="w-full min-w-[1080px] text-sm">
+          <table className="w-full text-sm">
             <thead className="bg-zinc-900/80 text-left text-xs text-zinc-400">
               <tr>
-                <th className="whitespace-nowrap px-4 py-3 font-medium">상품 정보</th>
-                <th className="whitespace-nowrap px-3 py-3 text-right font-medium">옵션</th>
+                <th className="w-full whitespace-nowrap px-4 py-3 font-medium">상품 정보</th>
+                <th className="hidden whitespace-nowrap px-3 py-3 text-right font-medium xl:table-cell">옵션</th>
                 <th className="whitespace-nowrap px-3 py-3 text-right font-medium">현재가</th>
-                <th className="whitespace-nowrap px-3 py-3 text-center font-medium">변동률 (7일)</th>
-                <th className="whitespace-nowrap px-3 py-3 font-medium">가격 추이 (30일)</th>
-                <th className="whitespace-nowrap px-3 py-3 text-center font-medium">마지막 기록</th>
-                <th className="whitespace-nowrap px-3 py-3 font-medium">상태</th>
+                <th className="hidden whitespace-nowrap px-3 py-3 text-center font-medium sm:table-cell">변동률 (7일)</th>
+                <th className="hidden whitespace-nowrap px-3 py-3 font-medium lg:table-cell">가격 추이 (30일)</th>
+                <th className="hidden whitespace-nowrap px-3 py-3 text-center font-medium xl:table-cell">마지막 기록</th>
+                <th className="hidden whitespace-nowrap px-3 py-3 font-medium sm:table-cell">상태</th>
                 <th className="px-4 py-3">
                   <span className="sr-only">작업</span>
                 </th>
@@ -238,10 +238,10 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
                     key={r.listingId}
                     className={`transition-colors hover:bg-zinc-800/30 ${r.listingId === recordedId ? "bg-emerald-500/[0.06]" : ""}`}
                   >
-                    <td className="px-4 py-2.5">
+                    <td className="w-full min-w-40 max-w-0 px-4 py-2.5">
                       <div className="flex items-center gap-3">
                         <GarmentIcon name={r.productName} color={r.color} />
-                        <div className="min-w-0 max-w-72">
+                        <div className="min-w-0">
                           <Link
                             href={`/products/${r.productId}`}
                             title={`${r.brandName} ${r.productName}`}
@@ -255,17 +255,17 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-zinc-200">{r.variantCount}개</td>
+                    <td className="hidden whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-zinc-200 xl:table-cell">{r.variantCount}개</td>
                     <td className="whitespace-nowrap px-3 py-2.5 text-right font-bold tabular-nums text-zinc-50">
                       {r.current !== null ? formatKRW(r.current) : "—"}
                     </td>
-                    <td className="px-3 py-2.5 text-center">
+                    <td className="hidden px-3 py-2.5 text-center sm:table-cell">
                       <ChangeBadge value={r.change} />
                     </td>
-                    <td className="px-3 py-2.5">
-                      <Sparkline values={r.series} label={`최근 30일 가격 추이, 기록 ${r.series.filter((v) => v !== null).length}일`} />
+                    <td className="hidden px-3 py-2.5 lg:table-cell">
+                      <Sparkline width={112} values={r.series} label={`최근 30일 가격 추이, 기록 ${r.series.filter((v) => v !== null).length}일`} />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5 text-center text-xs tabular-nums">
+                    <td className="hidden whitespace-nowrap px-3 py-2.5 text-center text-xs tabular-nums xl:table-cell">
                       {last ? (
                         <>
                           <div className="text-zinc-100">{formatAgo(last, now)}</div>
@@ -275,7 +275,7 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
                         <span className="text-zinc-500">기록 없음</span>
                       )}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-2.5">
+                    <td className="hidden whitespace-nowrap px-3 py-2.5 sm:table-cell">
                       {r.recordedToday ? (
                         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-400/40">
                           <span aria-hidden>✓</span> 기록 완료
@@ -287,7 +287,7 @@ export function CheckList({ rows, nowMs, recordedId }: { rows: CheckRow[]; nowMs
                       )}
                     </td>
                     <td className="px-4 py-2.5">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex flex-col items-end gap-1.5 md:flex-row md:justify-end md:gap-2">
                         <a href={r.url} target="_blank" rel="noreferrer" className={`${btn} text-zinc-200 ring-1 ring-inset ring-zinc-600 hover:bg-zinc-800`}>
                           {r.platformName} 열기 ↗
                         </a>

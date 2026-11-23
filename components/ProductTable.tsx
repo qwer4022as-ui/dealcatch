@@ -16,15 +16,15 @@ const th = "whitespace-nowrap py-3 pr-4 font-medium";
 export function ProductTable({ items, now }: { items: ProductListItem[]; now: Date }) {
   return (
     <div className="overflow-x-auto rounded-2xl border border-zinc-800 bg-zinc-950/60">
-      <table className="w-full min-w-[1080px] text-sm">
+      <table className="w-full text-sm">
         <thead className="text-left text-xs text-zinc-400">
           <tr className="border-b border-zinc-800">
-            <th className={`${th} w-[34%] pl-5`}>상품</th>
-            <th className={`${th} text-right`}>옵션</th>
+            <th className={`${th} w-full pl-5`}>상품</th>
+            <th className={`${th} hidden text-right lg:table-cell`}>옵션</th>
             <th className={`${th} text-right`}>현재가</th>
-            <th className={`${th} text-right`}>수집 기간 최저가</th>
-            <th className={th}>최저가에 가장 가까운 옵션</th>
-            <th className={th}>상태</th>
+            <th className={`${th} hidden text-right lg:table-cell`}>수집 기간 최저가</th>
+            <th className={`${th} hidden xl:table-cell`}>최저가에 가장 가까운 옵션</th>
+            <th className={`${th} hidden sm:table-cell`}>상태</th>
             <th className="py-3 pr-5">
               <span className="sr-only">상세</span>
             </th>
@@ -36,7 +36,7 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
             const stale = s.health === "failing" || s.health === "stale";
             return (
               <tr key={p.id} className="align-middle transition-colors hover:bg-zinc-800/30">
-                <td className="py-3 pr-4 pl-5">
+                <td className="min-w-48 py-3 pr-4 pl-5">
                   <div className="flex items-center gap-3">
                     <GarmentIcon name={`${p.category ?? ""} ${p.name}`} color={s.nearest?.label ?? ""} />
                     <div className="min-w-0">
@@ -49,14 +49,14 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
                     </div>
                   </div>
                 </td>
-                <td className="whitespace-nowrap py-3 pr-4 text-right tabular-nums text-zinc-200">{s.variantCount}개</td>
+                <td className="hidden whitespace-nowrap py-3 pr-4 text-right tabular-nums text-zinc-200 lg:table-cell">{s.variantCount}개</td>
                 <td className="whitespace-nowrap py-3 pr-4 text-right text-base font-bold tabular-nums text-zinc-50">
                   {priceRange(s)}
                   {stale && s.lastSuccessAt && (
                     <div className="text-xs font-normal text-zinc-400">{formatAgo(s.lastSuccessAt, now)} 기준</div>
                   )}
                 </td>
-                <td className="whitespace-nowrap py-3 pr-4 text-right tabular-nums">
+                <td className="hidden whitespace-nowrap py-3 pr-4 text-right tabular-nums lg:table-cell">
                   {s.periodLow ? (
                     <>
                       <div className="font-semibold text-zinc-100">{formatKRW(s.periodLow.price)}</div>
@@ -66,7 +66,7 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
                     "—"
                   )}
                 </td>
-                <td className="min-w-48 py-3 pr-4 text-xs">
+                <td className="hidden min-w-48 py-3 pr-4 text-xs xl:table-cell">
                   {s.nearest && s.nearestLowPct !== null ? (
                     <>
                       <div className={`whitespace-nowrap font-semibold ${s.nearestLowPct === 0 ? "text-accent" : "text-zinc-100"}`}>
@@ -84,7 +84,7 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
                     <span className="text-zinc-500">—</span>
                   )}
                 </td>
-                <td className="whitespace-nowrap py-3 pr-4">
+                <td className="hidden whitespace-nowrap py-3 pr-4 sm:table-cell">
                   <div className="flex flex-col items-start gap-1">
                     <Badge label={healthBadge(s, now)} />
                     {s.hasSample && <Badge label={{ text: "샘플", tone: "sample" }} />}
