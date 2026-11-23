@@ -1,12 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import heroMascot from "@/public/hero-mascot.png";
 import { Badge } from "@/components/Badge";
 import { AlertList } from "@/components/AlertList";
 import { CheckList } from "@/components/CheckList";
 import { ProductTable } from "@/components/ProductTable";
 import { SampleBanner } from "@/components/SampleBanner";
-import { Mascot } from "@/components/Mascot";
 import { formatAgo } from "@/lib/format";
 import { healthBadge } from "@/lib/pricing/labels";
 import { NEAR_LOW_PCT, isNearLow } from "@/lib/pricing/summary";
@@ -19,7 +20,7 @@ import { listCheckTargets, listProducts } from "@/lib/repositories/product-list"
 export default function DashboardPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8">
-      <section className="relative grid items-center gap-6 overflow-hidden md:grid-cols-[1fr_minmax(0,460px)]">
+      <section className="relative grid items-center gap-6 overflow-hidden md:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
         <div className="flex flex-col gap-3">
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             의류 <span className="text-accent">가격 추적</span> 대시보드
@@ -30,7 +31,12 @@ export default function DashboardPage() {
             수집 기간 최저가를 놓치지 마세요.
           </p>
         </div>
-        <Mascot className="w-full max-w-[460px] justify-self-end" />
+        <Image
+          src={heroMascot}
+          alt="옷걸이 비니를 쓰고 노트북으로 옷 가격을 확인하는 캐릭터"
+          priority
+          className="h-auto w-full max-w-[680px] justify-self-end [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+        />
       </section>
       <Suspense fallback={<p className="text-sm text-zinc-500">불러오는 중…</p>}>
         <Dashboard />
