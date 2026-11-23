@@ -235,18 +235,20 @@ async function VariantSection({
                 </svg>
                 최근 가격 기록
               </h2>
-              <span className="text-xs text-zinc-400">최근 {recent.length}건 · 시각은 KST</span>
+              <span className="text-xs text-zinc-400">
+                {platformName} · {optionLabel} · 최근 {recent.length}건 · 시각은 KST
+              </span>
             </div>
             {recent.length === 0 ? (
               <p className="text-sm text-zinc-400">수집 기록이 없습니다.</p>
             ) : (
               <div className="overflow-x-auto rounded-xl border border-zinc-800">
-                <table className="w-full min-w-[640px] text-sm">
+                <table className="w-full text-sm">
                   <thead className="bg-zinc-900/80 text-left text-xs text-zinc-400">
                     <tr>
                       <th className={th}>날짜</th>
-                      <th className={th}>판매처</th>
-                      <th className={th}>옵션</th>
+                      <th className={`${th} hidden sm:table-cell lg:hidden`}>판매처</th>
+                      <th className={`${th} hidden md:table-cell lg:hidden`}>옵션</th>
                       <th className={`${th} text-right`}>가격</th>
                       <th className={th}>상태</th>
                       <th className={th}>출처</th>
@@ -259,7 +261,7 @@ async function VariantSection({
                       return (
                         <tr key={a.id} className="hover:bg-zinc-800/30">
                           <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-zinc-200">{formatKstDateTime(a.attemptedAt)}</td>
-                          <td className="whitespace-nowrap px-3 py-2.5">
+                          <td className="hidden whitespace-nowrap px-3 py-2.5 sm:table-cell lg:hidden">
                             <span className="inline-flex items-center gap-2">
                               <span aria-hidden className="grid h-5 w-5 place-items-center rounded bg-zinc-100 text-[10px] font-black text-zinc-950">
                                 {platformName.slice(0, 1)}
@@ -267,7 +269,7 @@ async function VariantSection({
                               {platformName}
                             </span>
                           </td>
-                          <td className="px-3 py-2.5 text-zinc-300">{optionLabel}</td>
+                          <td className="hidden px-3 py-2.5 text-zinc-300 md:table-cell lg:hidden">{optionLabel}</td>
                           <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-zinc-50">
                             {s ? <span className={s.isVoid ? "line-through opacity-60" : undefined}>{formatKRW(s.salePrice)}</span> : "—"}
                             {s?.stockStatus === "sold_out" && <span className="ml-1 text-xs font-normal text-zinc-400">품절</span>}
