@@ -35,13 +35,18 @@ const PATHS: Record<Kind, string> = {
   pants: "M8 3h12l1.5 18H16l-2-11-2 11H6.5L8 3Z",
 };
 
-export function GarmentIcon({ name, color = "" }: { name: string; color?: string }) {
+export function GarmentIcon({ name, color = "", size = "md" }: { name: string; color?: string; size?: "md" | "lg" }) {
   const kind = pick(KIND_RULES, name, "tee");
   const fill = pick(COLOR_RULES, `${color} ${name}`, "#8b7ad8");
   const dark = fill === "#1e1c26";
   return (
-    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-zinc-800/70 ring-1 ring-inset ring-zinc-700/60" aria-hidden>
-      <svg viewBox="0 0 28 24" className="h-7 w-7">
+    <span
+      className={`grid shrink-0 place-items-center bg-zinc-800/70 ring-1 ring-inset ring-zinc-700/60 ${
+        size === "lg" ? "h-32 w-32 rounded-3xl bg-gradient-to-br from-zinc-700/60 to-zinc-900" : "h-11 w-11 rounded-xl"
+      }`}
+      aria-hidden
+    >
+      <svg viewBox="0 0 28 24" className={size === "lg" ? "h-20 w-20 drop-shadow-lg" : "h-7 w-7"}>
         <path
           d={PATHS[kind]}
           fill={fill}

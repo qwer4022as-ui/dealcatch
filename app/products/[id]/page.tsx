@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/Badge";
+import { GarmentIcon } from "@/components/GarmentIcon";
+import { HeroArt } from "@/components/HeroArt";
 import { ListingCompare } from "@/components/ListingCompare";
 import { NarrativeCard } from "@/components/NarrativeCard";
 import { TargetPriceForm } from "@/components/TargetPriceForm";
@@ -68,34 +70,56 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
     <>
       {product.isSample && <SampleBanner />}
 
-      <header className="flex flex-col gap-1">
-        <div className="text-sm text-zinc-600 dark:text-zinc-400">{product.brandName}</div>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl font-semibold">{product.name}</h1>
-          {!product.isSample && (
-            <Link
-              href={`/products/${product.id}/prices/new${selected ? `?listing=${selected.listingId}` : ""}`}
-              className="rounded-md px-3 py-1 text-sm ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800"
-            >
-              수동 가격 입력
-            </Link>
-          )}
+      <header className="grid items-center gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
+        <div className="hero-fade flex items-center gap-5">
+          <GarmentIcon size="lg" name={`${product.category ?? ""} ${product.name}`} color={selected?.optionLabel ?? ""} />
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="text-sm text-zinc-300">{product.brandName}</div>
+            <h1 className="text-2xl leading-snug font-extrabold tracking-tight text-zinc-50 sm:text-3xl">{product.name}</h1>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-300">
+              {product.modelNo && (
+                <span className="whitespace-nowrap">
+                  <span className="text-zinc-400">모델번호</span> {product.modelNo}
+                </span>
+              )}
+              {product.category && (
+                <>
+                  <span aria-hidden className="h-3.5 w-px bg-zinc-700" />
+                  <span>{product.category}</span>
+                </>
+              )}
+              {product.listings.map((l) => (
+                <span key={l.id} className="flex items-center gap-3">
+                  <span aria-hidden className="h-3.5 w-px bg-zinc-700" />
+                  <a
+                    href={l.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="whitespace-nowrap text-accent underline decoration-accent/50 underline-offset-4 hover:decoration-accent"
+                  >
+                    {l.platformName}에서 보기 ↗
+                  </a>
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-x-3 text-sm text-zinc-600 dark:text-zinc-400">
-          {product.modelNo && <span>모델번호 {product.modelNo}</span>}
-          {product.category && <span>{product.category}</span>}
-          {product.listings.map((l) => (
-            <a key={l.id} href={l.url} target="_blank" rel="noreferrer" className="underline underline-offset-2">
-              {l.platformName}에서 보기 ↗
-            </a>
-          ))}
-        </div>
+        <HeroArt className="hidden max-w-[520px] lg:block" />
       </header>
 
       {product.variants.length > 0 && (
-        <nav aria-label="옵션 선택" className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">옵션별 현재가</h2>
-          <div className="flex flex-wrap gap-2">
+        <nav aria-label="옵션 선택" className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h2 className="flex items-center gap-2 text-lg font-bold">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 text-accent" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" aria-hidden>
+                <path d="M3 12.6V4.4A1.4 1.4 0 0 1 4.4 3h8.2l8.4 8.4a1.4 1.4 0 0 1 0 2l-7.6 7.6a1.4 1.4 0 0 1-2 0z" />
+                <circle cx="7.6" cy="7.6" r="1.4" />
+              </svg>
+              옵션 선택
+            </h2>
+            <span className="text-xs text-zinc-400">옵션을 고르면 아래 요약과 그래프가 그 옵션 기준으로 바뀝니다.</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             {product.variants.map((v) => {
               const active = v.listingVariantId === selected?.listingVariantId;
               return (
@@ -104,25 +128,44 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
                   href={`/products/${product.id}?variant=${v.listingVariantId}`}
                   scroll={false}
                   aria-current={active ? "true" : undefined}
-                  className={`rounded-md px-3 py-1.5 text-sm ring-1 ring-inset ${
+                  className={`flex items-center gap-4 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm ring-1 ring-inset transition-colors ${
                     active
-                      ? "bg-zinc-900 text-white ring-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:ring-zinc-100"
-                      : "ring-zinc-300 hover:bg-zinc-50 dark:ring-zinc-700 dark:hover:bg-zinc-800"
+                      ? "bg-accent/15 text-zinc-50 ring-2 ring-accent shadow-[0_0_24px_-10px_rgb(185_164_255/0.7)]"
+                      : "bg-zinc-900/50 text-zinc-200 ring-zinc-700 hover:bg-zinc-800"
                   }`}
                 >
-                  <span className="text-xs opacity-75">{v.platformName}</span> {v.optionLabel}
-                  <span className="ml-2 tabular-nums">
-                    {v.latestPrice !== null ? formatKRW(v.latestPrice) : "—"}
-                    {v.latestStock === "sold_out" && " · 품절"}
+                  <span>
+                    <span className="text-zinc-400">{v.platformName}</span> {v.optionLabel}
                   </span>
+                  <span className="font-bold tabular-nums">
+                    {v.latestPrice !== null ? formatKRW(v.latestPrice) : "—"}
+                    {v.latestStock === "sold_out" && <span className="ml-1 text-xs font-normal text-zinc-400">품절</span>}
+                  </span>
+                  {active && (
+                    <span aria-hidden className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[11px] font-bold text-zinc-950">
+                      ✓
+                    </span>
+                  )}
                 </Link>
               );
             })}
+            {!product.isSample && (
+              <>
+                <span aria-hidden className="mx-1 hidden h-8 w-px bg-zinc-700 sm:block" />
+                <Link
+                  href={`/products/${product.id}/prices/new${selected ? `?listing=${selected.listingId}` : ""}`}
+                  className="flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold text-accent ring-1 ring-inset ring-accent/60 hover:bg-accent/10"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" />
+                  </svg>
+                  수동 가격 입력
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       )}
-
-      <ListingCompare rows={compareRows} now={now} />
 
       {admin && !product.isSample && (
         <TargetPriceForm
@@ -139,12 +182,15 @@ async function ProductDetailView({ params, searchParams }: PageProps<"/products/
           canVoid={!product.isSample && admin}
           listingVariantId={selected.listingVariantId}
           listingId={selected.listingId}
-          label={`${selected.platformName} · ${selected.optionLabel}`}
+          platformName={selected.platformName}
+          optionLabel={selected.optionLabel}
           now={now}
         />
       ) : (
-        <p className="text-sm text-zinc-600">등록된 옵션이 없습니다.</p>
+        <p className="text-sm text-zinc-400">등록된 옵션이 없습니다.</p>
       )}
+
+      <ListingCompare rows={compareRows} now={now} />
     </>
   );
 }
@@ -154,7 +200,8 @@ async function VariantSection({
   canVoid,
   listingVariantId,
   listingId,
-  label,
+  platformName,
+  optionLabel,
   now,
 }: {
   productId: number;
@@ -162,7 +209,8 @@ async function VariantSection({
   canVoid: boolean;
   listingVariantId: number;
   listingId: number;
-  label: string;
+  platformName: string;
+  optionLabel: string;
   now: Date;
 }) {
   const history = await getVariantHistory(listingVariantId, listingId);
@@ -171,73 +219,98 @@ async function VariantSection({
   const priceByAttempt = new Map(history.snapshots.map((s) => [s.attemptId, s]));
   const recent = history.attempts.slice(0, RECENT_LIMIT);
 
+  const th = "whitespace-nowrap px-3 py-2.5 font-medium";
   return (
     <>
-      <PriceSummary stats={stats} now={now} variantLabel={label} />
-      <NarrativeCard narrative={buildNarrative(stats, now)} />
-      <PriceChart points={points} nowMs={now.getTime()} />
+      <PriceSummary stats={stats} now={now} variantLabel={`${platformName} · ${optionLabel}`} />
 
-      <section aria-label="최근 수집 기록" className="flex flex-col gap-2">
-        <h2 className="text-base font-semibold">최근 수집 기록 ({recent.length}건)</h2>
-        {recent.length === 0 ? (
-          <p className="text-sm text-zinc-600">수집 기록이 없습니다.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="text-left text-xs text-zinc-500 dark:text-zinc-400">
-                <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                  <th className="py-2 pr-4 font-medium">시각 (KST)</th>
-                  <th className="py-2 pr-4 text-right font-medium">판매가</th>
-                  <th className="py-2 pr-4 font-medium">결과</th>
-                  <th className="py-2 pr-4 font-medium">출처</th>
-                  {canVoid && <th className="py-2 font-medium">관리</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {recent.map((a) => {
-                  const s = priceByAttempt.get(a.id);
-                  return (
-                    <tr key={a.id} className="border-b border-zinc-100 dark:border-zinc-900">
-                      <td className="py-2 pr-4 tabular-nums">{formatKstDateTime(a.attemptedAt)}</td>
-                      <td className="py-2 pr-4 text-right tabular-nums">
-                        {s ? (
-                          <span className={s.isVoid ? "line-through opacity-60" : undefined}>
-                            {formatKRW(s.salePrice)}
-                          </span>
-                        ) : (
-                          "—"
-                        )}
-                        {s?.stockStatus === "sold_out" && <span className="ml-1 text-xs">품절</span>}
-                      </td>
-                      <td className="py-2 pr-4">
-                        {a.outcome === "success" ? (
-                          s?.isVoid ? (
-                            <span title={s.voidReason ?? undefined}>무효 처리{s.voidReason && ` · ${s.voidReason}`}</span>
-                          ) : (
-                            "성공"
-                          )
-                        ) : (
-                          <span className="text-red-700 dark:text-red-300" title={a.errorDetail ?? undefined}>
-                            ✕ {outcomeLabel(a.outcome)}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-2 pr-4">{s ? <Badge label={sourceBadge(s.source)} /> : "—"}</td>
-                      {canVoid && (
-                        <td className="py-2 align-top">
-                          {s && !s.isVoid && s.source !== "sample" && (
-                            <VoidButton productId={productId} listingVariantId={listingVariantId} snapshotId={s.id} />
-                          )}
-                        </td>
-                      )}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+        <div className="card flex min-w-0 flex-col gap-6 p-5">
+          <PriceChart points={points} nowMs={now.getTime()} embedded />
+
+          <section aria-label="최근 가격 기록" className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="flex items-center gap-2 text-lg font-bold">
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-accent" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" aria-hidden>
+                  <rect x="5" y="4" width="14" height="17" rx="2" />
+                  <path d="M9 3h6v3H9zM9 11h6M9 15h4" />
+                </svg>
+                최근 가격 기록
+              </h2>
+              <span className="text-xs text-zinc-400">최근 {recent.length}건 · 시각은 KST</span>
+            </div>
+            {recent.length === 0 ? (
+              <p className="text-sm text-zinc-400">수집 기록이 없습니다.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-zinc-800">
+                <table className="w-full min-w-[640px] text-sm">
+                  <thead className="bg-zinc-900/80 text-left text-xs text-zinc-400">
+                    <tr>
+                      <th className={th}>날짜</th>
+                      <th className={th}>판매처</th>
+                      <th className={th}>옵션</th>
+                      <th className={`${th} text-right`}>가격</th>
+                      <th className={th}>상태</th>
+                      <th className={th}>출처</th>
+                      {canVoid && <th className={th}>관리</th>}
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/70">
+                    {recent.map((a) => {
+                      const s = priceByAttempt.get(a.id);
+                      return (
+                        <tr key={a.id} className="hover:bg-zinc-800/30">
+                          <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-zinc-200">{formatKstDateTime(a.attemptedAt)}</td>
+                          <td className="whitespace-nowrap px-3 py-2.5">
+                            <span className="inline-flex items-center gap-2">
+                              <span aria-hidden className="grid h-5 w-5 place-items-center rounded bg-zinc-100 text-[10px] font-black text-zinc-950">
+                                {platformName.slice(0, 1)}
+                              </span>
+                              {platformName}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-zinc-300">{optionLabel}</td>
+                          <td className="whitespace-nowrap px-3 py-2.5 text-right font-semibold tabular-nums text-zinc-50">
+                            {s ? <span className={s.isVoid ? "line-through opacity-60" : undefined}>{formatKRW(s.salePrice)}</span> : "—"}
+                            {s?.stockStatus === "sold_out" && <span className="ml-1 text-xs font-normal text-zinc-400">품절</span>}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-2.5">
+                            {a.outcome === "success" ? (
+                              s?.isVoid ? (
+                                <span className="text-xs text-zinc-400" title={s.voidReason ?? undefined}>
+                                  무효 처리{s.voidReason && ` · ${s.voidReason}`}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 text-xs text-accent ring-1 ring-inset ring-accent/40">
+                                  ✓ 수집 완료
+                                </span>
+                              )
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs text-red-300 ring-1 ring-inset ring-red-400/40" title={a.errorDetail ?? undefined}>
+                                ✕ {outcomeLabel(a.outcome)}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5">{s ? <Badge label={sourceBadge(s.source)} /> : "—"}</td>
+                          {canVoid && (
+                            <td className="px-3 py-2.5 align-top">
+                              {s && !s.isVoid && s.source !== "sample" && (
+                                <VoidButton productId={productId} listingVariantId={listingVariantId} snapshotId={s.id} />
+                              )}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </div>
+
+        <NarrativeCard narrative={buildNarrative(stats, now)} />
+      </div>
     </>
   );
 }
