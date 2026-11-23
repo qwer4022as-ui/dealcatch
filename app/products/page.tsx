@@ -116,8 +116,8 @@ async function ProductList({ searchParams }: PageProps<"/products">) {
     <>
       <section aria-label="요약" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={StatIcons.hanger} label="추적 상품" value={stats.total} />
-        <StatCard icon={StatIcons.tag} label="최저가 동일" value={stats.atLow} note="현재가 = 수집 기간 최저가" />
-        <StatCard icon={StatIcons.trendDown} label="최근 최저가 갱신" value={stats.recentNewLow} note={`최근 ${NEW_LOW_DAYS}일`} tone="green" />
+        <StatCard icon={StatIcons.tag} label="최저가 동일" value={stats.atLow} note="현재가가 최저가와 같음" />
+        <StatCard icon={StatIcons.trendDown} label={`최저가 갱신 (${NEW_LOW_DAYS}일)`} value={stats.recentNewLow} tone="green" />
         <StatCard icon={StatIcons.refresh} label="데이터 갱신 필요" value={stats.needsUpdate} note="오래됨 · 수집 실패" tone="amber" />
       </section>
 

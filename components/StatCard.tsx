@@ -24,21 +24,19 @@ export function StatCard({ icon, label, value, unit = "개", note, tone = "viole
 }) {
   const t = TONE[tone];
   return (
-    <div className={`relative flex items-center gap-4 overflow-hidden rounded-2xl border px-5 py-4 ${t.card}`}>
+    <div className={`relative flex min-h-28 items-center gap-4 overflow-hidden rounded-2xl border px-5 py-4 ${t.card}`}>
       <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-full bg-zinc-800/80 p-2.5 ring-1 ring-inset ring-zinc-700 ${t.icon}`}>{icon}</span>
-      <div className="relative flex min-w-0 flex-1 flex-col">
-        <span className="whitespace-nowrap text-sm text-zinc-300">{label}</span>
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <span className={`whitespace-nowrap text-2xl font-extrabold tabular-nums ${valueClass}`}>
-            {value}
-            {unit && <span className="ml-0.5 text-base font-bold">{unit}</span>}
-          </span>
-          {aside && <span className="whitespace-nowrap text-xs tabular-nums">{aside}</span>}
-        </div>
+      <div className="relative flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="truncate text-sm text-zinc-300">{label}</span>
+        <span className={`whitespace-nowrap text-2xl leading-tight font-extrabold tabular-nums ${valueClass}`}>
+          {value}
+          {unit && <span className="ml-0.5 text-base font-bold">{unit}</span>}
+        </span>
+        {aside && <span className="truncate text-xs tabular-nums">{aside}</span>}
         {children}
-        {note && <span className="text-xs text-zinc-500">{note}</span>}
+        {note && <span className="truncate text-xs text-zinc-500" title={note}>{note}</span>}
       </div>
-      <span aria-hidden className={`pointer-events-none absolute -right-2 top-1/2 h-20 w-20 -translate-y-1/2 opacity-[0.08] ${t.icon}`}>
+      <span aria-hidden className={`pointer-events-none absolute -right-2 top-1/2 h-20 w-20 -translate-y-1/2 opacity-[0.06] ${t.icon}`}>
         {icon}
       </span>
     </div>

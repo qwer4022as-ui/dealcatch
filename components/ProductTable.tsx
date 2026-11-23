@@ -19,13 +19,13 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
       <table className="w-full text-sm">
         <thead className="text-left text-xs text-zinc-400">
           <tr className="border-b border-zinc-800">
-            <th className={`${th} w-full pl-5`}>상품</th>
+            <th className={`${th} w-full pl-4 sm:pl-5`}>상품</th>
             <th className={`${th} hidden text-right lg:table-cell`}>옵션</th>
             <th className={`${th} text-right`}>현재가</th>
             <th className={`${th} hidden text-right lg:table-cell`}>수집 기간 최저가</th>
             <th className={`${th} hidden xl:table-cell`}>최저가에 가장 가까운 옵션</th>
             <th className={`${th} hidden sm:table-cell`}>상태</th>
-            <th className="py-3 pr-5">
+            <th className="hidden py-3 pr-5 sm:table-cell">
               <span className="sr-only">상세</span>
             </th>
           </tr>
@@ -36,7 +36,7 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
             const stale = s.health === "failing" || s.health === "stale";
             return (
               <tr key={p.id} className="align-middle transition-colors hover:bg-zinc-800/30">
-                <td className="min-w-48 py-3 pr-4 pl-5">
+                <td className="min-w-48 py-3 pr-4 pl-4 sm:pl-5">
                   <div className="flex items-center gap-3">
                     <GarmentIcon name={`${p.category ?? ""} ${p.name}`} color={s.nearest?.label ?? ""} />
                     <div className="min-w-0">
@@ -90,7 +90,7 @@ export function ProductTable({ items, now }: { items: ProductListItem[]; now: Da
                     {s.hasSample && <Badge label={{ text: "샘플", tone: "sample" }} />}
                   </div>
                 </td>
-                <td className="whitespace-nowrap py-3 pr-5 text-right">
+                <td className="hidden whitespace-nowrap py-3 pr-5 text-right sm:table-cell">
                   <Link
                     href={`/products/${p.id}`}
                     aria-label={`${p.brandName} ${p.name} 상세보기`}

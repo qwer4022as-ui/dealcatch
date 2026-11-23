@@ -45,7 +45,7 @@ body {
   background-attachment: fixed;
   color: var(--foreground);
   word-break: keep-all;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-family: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 
