@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { TAG_PATH } from "@/components/Logo";
 
 export type StatTone = "violet" | "green" | "amber";
 
@@ -52,7 +53,7 @@ const svg = (d: string, extra?: ReactNode) => (
 
 export const StatIcons = {
   hanger: svg("M10 6.2a2 2 0 1 1 3 1.7L12 8.6v1.6M12 10.2 2.8 16.4a1 1 0 0 0 .6 1.8h17.2a1 1 0 0 0 .6-1.8L12 10.2Z"),
-  tag: svg("M3 12.6V4.4A1.4 1.4 0 0 1 4.4 3h8.2l8.4 8.4a1.4 1.4 0 0 1 0 2l-7.6 7.6a1.4 1.4 0 0 1-2 0z", <circle cx="7.6" cy="7.6" r="1.4" />),
+  tag: svg(TAG_PATH, <circle cx="7.6" cy="7.6" r="1.4" />),
   trendDown: svg("M3 7l6 6 4-4 8 8M21 11v6h-6"),
   chart: svg("M4 4v16h16M7 15l4-4 3 3 5-6"),
   check: svg("M8 12.5l2.5 2.5L16 9.5", <circle cx="12" cy="12" r="9" />),
