@@ -313,5 +313,21 @@ ok("실제 플랫폼 3개 유지", after.real === before.n && before.n === 3);
 await db.exec(readFileSync(join(ROOT, "supabase/seed/sample.sql"), "utf8").replace(/create function pg_temp/g, "create or replace function pg_temp"));
 ok("purge 후 시드 재적용 가능", (await one(`select count(*)::int n from products where is_sample`)).n === 6);
 
+// 데모 시드 (supabase/seed/demo_90d.sql): 90일 상품 10개. 위 검사 개수에 섞이지 않게 같은 DB 에서 마지막에 확인
+const demo = readFileSync(join(ROOT, "supabase/seed/demo_90d.sql"), "utf8");
+await db.exec(demo);
+const d1 = await one(`select count(*)::int p,
+   (select count(distinct (ps.collected_at at time zone 'Asia/Seoul')::date)::int from price_snapshots ps
+      join listing_variants lv on lv.id = ps.listing_variant_id join listings l on l.id = lv.listing_id
+      join products pr on pr.id = l.product_id where pr.model_no like 'SMP-D-%') days,
+   (select bool_and(ps.source = 'sample') from price_snapshots ps join listing_variants lv on lv.id = ps.listing_variant_id
+      join listings l on l.id = lv.listing_id join products pr on pr.id = l.product_id where pr.model_no like 'SMP-D-%') all_sample
+   from products where model_no like 'SMP-D-%' and is_sample`);
+ok("데모 시드: 샘플 상품 10개 · 91일 · 전부 source=sample", d1.p === 10 && d1.days === 91 && d1.all_sample, JSON.stringify(d1));
+await db.exec(demo);
+ok("데모 시드: 다시 실행해도 중복 없음", (await one(`select count(*)::int n from products where model_no like 'SMP-D-%'`)).n === 10);
+await db.exec(`select purge_sample_data()`);
+ok("데모 시드: purge 로 모두 삭제", (await one(`select count(*)::int n from products where model_no like 'SMP-D-%'`)).n === 0);
+
 console.log(`\n결과: ${pass} 통과, ${fail} 실패`);
 process.exit(fail ? 1 : 0);

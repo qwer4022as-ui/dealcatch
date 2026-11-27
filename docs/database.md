@@ -292,6 +292,8 @@ supabase/
 
 수집 시각은 매일 09:00, 21:00(KST)이고, 날짜는 시드 실행 시점 기준 "N일 전"으로 계산한다.
 
+**데모 시드** (`supabase/seed/demo_90d.sql`): 화면 시연용으로 90일 가격 이력이 있는 샘플 상품 10개(모델번호 `SMP-D-01`~`SMP-D-10`)를 넣는다. 단계 인하·반짝 세일·인상·지그재그·품절 등 가격 패턴이 상품마다 다르다. 하루 1회 21:00(KST) 기록이며, 이미 들어가 있으면 아무것도 하지 않는다. 위 검증용 시드와 같은 규칙(가상 브랜드, `is_sample=true`, `source='sample'`)을 따르므로 `purge_sample_data()`로 함께 지워진다.
+
 - 모든 샘플 상품은 `is_sample=true`, 가상 브랜드, `source='sample'`이다.
 - 삭제: append-only 트리거가 `price_snapshots` DELETE를 막으므로, 전용 함수 `purge_sample_data()`만 샘플 행(`source='sample'`) 삭제를 허용한다. 이 함수는 샘플 스냅샷 → 샘플 시도·실행 → `is_sample` 상품 순으로 삭제하며, 실제 수집 데이터는 건드리지 않는다.
 
