@@ -178,10 +178,11 @@ type AdapterResult<T> =
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 클라이언트 | 읽기 전용 (RLS로 제한) |
 | `SUPABASE_SERVICE_ROLE_KEY` | **서버 전용** | 쓰기 작업 |
 | `CRON_SECRET` | 서버 전용 | 크론 엔드포인트 인증 |
-| `ADMIN_TOKEN` | 서버 전용 | MVP 단계 쓰기 화면 보호 (간이 인증) |
+| `ADMIN_ID` · `ADMIN_PASSWORD` | 서버 전용 | 로그인 아이디·비밀번호 (공유 계정 하나) |
+| `ADMIN_TOKEN` | 서버 전용 | 로그인 세션 쿠키 서명 키 |
 
 - `lib/supabase/server.ts`에 `import 'server-only'`를 넣어 service role 키가 클라이언트 번들에 들어가지 않게 한다.
-- MVP는 로그인이 없으므로 등록·입력 화면은 `ADMIN_TOKEN` 쿠키 또는 Vercel 배포 보호로 막는다. 다중 사용자 단계에서 Supabase Auth로 교체한다.
+- 등록·입력 화면은 환경변수로 정한 아이디·비밀번호(공유 계정 하나)로 로그인해야 쓸 수 있다. 세션 쿠키는 `ADMIN_TOKEN`·아이디·비밀번호로 만든 키로 서명한다. 다중 사용자 단계에서 Supabase Auth로 교체한다.
 
 ## 9. PC·노트북 동기화 (Git/GitHub)
 

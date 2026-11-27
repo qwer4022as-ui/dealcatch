@@ -1,8 +1,14 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { getAdminToken } from "@/lib/env";
-import { SESSION_TTL_MS, safeEqual, signSession, verifySession } from "./session";
+import { getAdminCredentials, getAdminToken } from "@/lib/env";
+import { SESSION_TTL_MS, credentialsMatch, sessionSecret, signSession, verifySession } from "./session";
+
+/** 세션 서명 키 (환경변수가 빠져 있으면 예외) */
+function currentSecret(): string {
+  const { id, password } = getAdminCredentials();
+  return sessionSecret(getAdminToken(), id, password);
+}
 
 export const ADMIN_COOKIE = "admin_session";
 
@@ -11,7 +17,7 @@ export async function isAdmin(): Promise<boolean> {
   const store = await cookies();
   let secret: string;
   try {
-    secret = getAdminToken();
+    secret = currentSecret();
   } catch {
     return false; // 설정 누락은 로그인 시도 때 안내한다 (화면 전체가 멈추지 않게)
   }
@@ -23,10 +29,11 @@ export async function requireAdmin(nextPath = "/"): Promise<void> {
   if (!(await isAdmin())) redirect(`/login?next=${encodeURIComponent(nextPath)}`);
 }
 
-/** 입력한 토큰이 맞으면 세션 쿠키를 발급하고 true */
-export async function startAdminSession(inputToken: string): Promise<boolean> {
-  const secret = getAdminToken();
-  if (!safeEqual(inputToken, secret)) return false;
+/** 아이디·비밀번호가 맞으면 세션 쿠키를 발급하고 true */
+export async function startAdminSession(input: { id: string; password: string }): Promise<boolean> {
+  const expected = getAdminCredentials();
+  if (!credentialsMatch(input, expected)) return false;
+  const secret = sessionSecret(getAdminToken(), expected.id, expected.password);
   const store = await cookies();
   store.set(ADMIN_COOKIE, signSession(secret, Date.now() + SESSION_TTL_MS), {
     httpOnly: true,
