@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { safeEqual, safeNextPath, signSession, verifySession } from "./session";
+import { safeEqual, safeNextPath, signSession, verifySession, credentialsMatch, sessionSecret } from "./session";
 
 const SECRET = "test-secret-0123456789abcdef";
 const NOW = 1_800_000_000_000;
@@ -47,5 +47,37 @@ describe("safeNextPath", () => {
     expect(safeNextPath("//evil.example")).toBe("/");
     expect(safeNextPath("/\\evil.example")).toBe("/");
     expect(safeNextPath(undefined)).toBe("/");
+  });
+});
+
+describe("credentialsMatch", () => {
+  const expected = { id: "owner", password: "correct-horse" };
+  it("아이디·비밀번호가 모두 맞아야 true", () => {
+    expect(credentialsMatch({ id: "owner", password: "correct-horse" }, expected)).toBe(true);
+    expect(credentialsMatch({ id: "owner", password: "wrong" }, expected)).toBe(false);
+    expect(credentialsMatch({ id: "other", password: "correct-horse" }, expected)).toBe(false);
+    expect(credentialsMatch({ id: "", password: "" }, expected)).toBe(false);
+  });
+  it("아이디 앞뒤 공백은 무시, 비밀번호는 그대로 비교", () => {
+    expect(credentialsMatch({ id: "  owner ", password: "correct-horse" }, expected)).toBe(true);
+    expect(credentialsMatch({ id: "owner", password: " correct-horse" }, expected)).toBe(false);
+  });
+});
+
+describe("sessionSecret", () => {
+  it("토큰·아이디·비밀번호 중 하나라도 바뀌면 기존 세션 무효", () => {
+    const base = sessionSecret("t".repeat(16), "owner", "correct-horse");
+    const session = signSession(base, NOW + 1000);
+    expect(verifySession(base, session, NOW)).toBe(true);
+    for (const changed of [
+      sessionSecret("u".repeat(16), "owner", "correct-horse"),
+      sessionSecret("t".repeat(16), "owner2", "correct-horse"),
+      sessionSecret("t".repeat(16), "owner", "new-password"),
+    ]) {
+      expect(verifySession(changed, session, NOW)).toBe(false);
+    }
+  });
+  it("구분자 덕분에 값 경계가 섞이지 않음", () => {
+    expect(sessionSecret("ab", "c", "d")).not.toBe(sessionSecret("a", "bc", "d"));
   });
 });

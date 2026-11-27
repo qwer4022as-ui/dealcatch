@@ -25,6 +25,16 @@ export function getAdminToken(): string {
   return token;
 }
 
+/** 로그인 아이디·비밀번호 (서버 환경변수). 비밀번호가 짧으면 추측될 수 있으므로 거부한다. */
+export function getAdminCredentials(): { id: string; password: string } {
+  const id = required("ADMIN_ID").trim();
+  const password = required("ADMIN_PASSWORD");
+  if (password.length < 8) {
+    throw new Error("ADMIN_PASSWORD 는 8자 이상이어야 합니다.");
+  }
+  return { id, password };
+}
+
 /** 쓰기용 service role 키. RLS 를 우회하므로 서버 액션 안에서만 사용한다. */
 export function getServiceRoleKey(): string {
   return required("SUPABASE_SERVICE_ROLE_KEY");

@@ -9,18 +9,19 @@ export interface LoginState {
 }
 
 export async function loginAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
-  const token = String(formData.get("token") ?? "");
+  const id = String(formData.get("id") ?? "");
+  const password = String(formData.get("password") ?? "");
   const next = safeNextPath(formData.get("next"));
 
   let ok: boolean;
   try {
-    ok = await startAdminSession(token);
+    ok = await startAdminSession({ id, password });
   } catch (e) {
     return { error: e instanceof Error ? e.message : "서버 설정을 확인해 주세요." };
   }
   if (!ok) {
     await new Promise((r) => setTimeout(r, 500)); // 연속 시도 속도 제한
-    return { error: "관리자 토큰이 올바르지 않습니다." };
+    return { error: "아이디 또는 비밀번호가 올바르지 않습니다." };
   }
   redirect(next);
 }
